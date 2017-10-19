@@ -1,0 +1,15 @@
+-Setup leap motion
+	-see what output is available
+	-see what gestures are actually recongizable
+-Develop language
+	-Determine commands we want to run
+	-Determine gestures that build those commands
+	-Determine gesture syntax
+-Check in with Prof Sattar
+-Determine RPYTT vectors for each complex command
+-Write test of each gesture
+-Implement Leap to Gesture node
+-Implement Interpret Node
+-Implement Compiler Node
+-Implement Run Node
+-Test
