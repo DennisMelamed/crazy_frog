@@ -4,8 +4,10 @@
 
 #Goals
 * Provide gestural macros for controlling microUAVs
+
 #Current State
 * Non-existent
+
 #Nodes
 * Leap to Gesture Node 
 publishes gesture from known library based on programmer
@@ -15,6 +17,7 @@ Given some set of gestures (>=1), forms a complex command
 Translates complex command into vector of RPYTT
 * Run Node 
 takes queue of commands and sends appropriately timed messages to UAV
+
 #Messages
 * Gesture Message
 header
