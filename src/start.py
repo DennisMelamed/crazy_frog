@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
+import sklearn
 from std_msgs.msg import String
 
 def talker():
