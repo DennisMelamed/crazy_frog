@@ -1,6 +1,7 @@
 ### Dependencies
 * ROS Indigo
 * Leap Motion SDK (Ubuntu)
+* scikit-learn
 
 ### Goals
 * Provide gestural macros for controlling microUAVs

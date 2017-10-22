@@ -24,6 +24,3 @@ include_directories(
 )
 
 
-add_executable(laserCalibration src/laserCalibration.cpp)
-add_dependencies(odom_listen line_driver laserCalibration nav_msgs_generate_messages_cpp realRoomRendezvous realRoomRendezvous1 roomRendezvous roomRendezvous1 rotationTest amcl_pose_readerdriver bug2 bug2new createRendezvous createRendezvous1 gmapping_pos)
-target_link_libraries(line_driver ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
