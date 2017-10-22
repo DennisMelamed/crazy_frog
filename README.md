@@ -1,14 +1,14 @@
-#Dependencies
+### Dependencies
 * ROS Indigo
 * Leap Motion SDK (Ubuntu)
 
-#Goals
+### Goals
 * Provide gestural macros for controlling microUAVs
 
-#Current State
+### Current State
 * Non-existent
 
-#Nodes
+### Nodes
 * Leap to Gesture Node 
 publishes gesture from known library based on programmer
 * Interpret Node - Gestures to Modular commands Node
@@ -18,7 +18,7 @@ Translates complex command into vector of RPYTT
 * Run Node 
 takes queue of commands and sends appropriately timed messages to UAV
 
-#Messages
+### Messages
 * Gesture Message
 header
 uint16 gesture_number "here's what I understood from the programmer"
@@ -31,5 +31,5 @@ string command "heres what I want to do"
 header
 float64[n][5] uav_commands "do this set of things, UAV"
 
-#Services
+### Services
 
