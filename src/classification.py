@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
 
-numPointsToCollect = 20
+numPointsToCollect = 2000
 n_neighbors = 2
 i = 0
 X = np.empty([numPointsToCollect,2], dtype=float)
