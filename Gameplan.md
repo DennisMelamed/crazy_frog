@@ -7,7 +7,9 @@
 	-Determine gesture syntax
 -Check in with Prof Sattar
 -Determine RPYTT vectors for each complex command
--Write test of each gesture
+-Collect training data for Leap output of each gesture
+	-Train classifier based on data (svm should be fine)
+	-Test classifier, modify as necessary
 -Implement Leap to Gesture node
 -Implement Interpret Node
 -Implement Compiler Node
