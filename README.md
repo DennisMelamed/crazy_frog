@@ -2,6 +2,7 @@
 * ROS Indigo
 * Leap Motion SDK (Ubuntu)
 * scikit-learn
+* numpy
 
 ### Goals
 * Provide gestural macros for controlling microUAVs
