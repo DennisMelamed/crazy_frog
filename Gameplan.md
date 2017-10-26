@@ -7,7 +7,7 @@
 * Determine gesture syntax  
 ### Train classifier based on data (svm should be fine)  
 * Collect training data for Leap output of each gesture  
-* train SVM on data,  
+* train KNN on data,  
 * Test classifier, modify as necessary  
 ### Check in with Prof Sattar  
 ### Determine RPYTT vectors for each complex command  
