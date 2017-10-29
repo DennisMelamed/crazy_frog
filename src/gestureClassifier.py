@@ -20,12 +20,13 @@ if not os.path.exists(out_folder):
 # find pickles in input folder
 pickled_gestures = glob.glob(inp_folder + "*" + file_extension)
 
+print pickled_gestures
 # format data into np.arrays 
 #	gesture_data is the dataset
 #	class_data is the corresponding class for each row
 class_num = 0
 dict_class_gesture = {}
-for pickled_gesture in pickles:
+for pickled_gesture in pickled_gestures:
 	dict_class_gesture.update({class_num:pickled_gesture})
 	with open(pickled_gesture, 'r+b') as f_handler:
 		new_gesture_data = pickle.load(f_handler)			#	numpy array
@@ -34,7 +35,7 @@ for pickled_gesture in pickles:
 		class_data = np.full((1,gesture_data.shape[0]),class_num)
 	else:
 		gesture_data = np.vstack((gesture_data, new_gesture_data)) 
-		class_data = np.hstack(class_data,np.full((1,new_gesture_data.shape[0]),class_num))
+		class_data = np.hstack((class_data, np.full((1,new_gesture_data.shape[0]),class_num)))
 	class_num = 1 + class_num
 
 # output a dictionary of what labels correspond to what gestures
@@ -46,8 +47,12 @@ output.close()
 #for weights in ['uniform', 'distance']:
 weights = 'distance'  
       # we create an instance of Neighbours Classifier and fit the data.
-    classy_mammer_jammer = neighbors.KNeighborsClassifier(n_neighbors, weights=weights)
-    classy_mammer_jammer.fit(gesture_data, class_data)
+print len(gesture_data)
+print len(gesture_data[0])
+print len(class_data)
+print class_data
+classy_mammer_jammer = neighbors.KNeighborsClassifier(n_neighbors, weights=weights)
+classy_mammer_jammer.fit(gesture_data, class_data[0])
 
 # output the actual classifier to be later used for prediction
 output = open(out_folder+'classifier.pkl', 'wb')

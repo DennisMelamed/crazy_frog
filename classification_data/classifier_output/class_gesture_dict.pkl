@@ -1,0 +1,8 @@
+(dp0
+I0
+S'../classification_data/middleFingerRawData.pkl'
+p1
+sI1
+S'../classification_data/indexFingerRawData.pkl'
+p2
+s.
