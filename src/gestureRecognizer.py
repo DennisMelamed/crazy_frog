@@ -5,15 +5,37 @@ import pickle
 import sklearn
 from std_msgs.msg import String
 from leap_motion.msg import leapros
+from std_msgs.msg import Int32
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
 
+pub = None
+
 classifier = None
+circular_buffer = np.empty([300], dtype=float)
+previous_gesture = None
+
+def shift(arr, num, fill_value=np.nan):
+    result = np.empty_like(arr)
+    if num > 0:
+        result[:num] = fill_value
+        result[num:] = arr[:-num]
+    elif num < 0:
+        result[num:] = fill_value
+        result[:num] = arr[-num:]
+    else:
+        result = arr
+    return result
+
 
 def callback(data):
     global classifier
+    global pub
+    global circular_buffer
+    global previous_gesture
     X = np.empty([87], dtype=float)
     X = [data.direction.x, data.direction.y, data.direction.z,
                 data.normal.x, data.normal.y, data.normal.z,
@@ -44,15 +66,28 @@ def callback(data):
                 data.pinky_intermediate.x,  data.pinky_intermediate.y, data.pinky_intermediate.z,
                 data.pinky_distal.x,        data.pinky_distal.y,       data.pinky_distal.z,
                 data.pinky_tip.x,           data.pinky_tip.y,          data.pinky_tip.z,]
-    print [x for x in classifier.predict([X])]
+
+    
+    
+    circular_buffer = shift(circular_buffer, 1, classifier.predict([X])[0])
+    mode = stats.mode(circular_buffer, axis=None)
+    rospy.loginfo(np.array_str(circular_buffer))
+    rospy.loginfo(classifier.predict([X])[0])
+    rospy.loginfo(str(mode[0][0]) + " " + str(previous_gesture))
+    if mode[0][0] != previous_gesture:
+        pub.publish(mode[0][0])
+        previous_gesture = mode[0][0]
 
 
 def recording():
         global classifier 
+        global pub
         classifier = pickle.load(open("../classification_data/classifier_output/classifier.pkl"))
         rospy.init_node('gestureRecognizer', anonymous=True)
         sub = rospy.Subscriber('leapmotion/data', leapros , callback)
+        pub = rospy.Publisher('crazyFrog/current_gesture', Int32, queue_size = 10)
         rospy.spin()
+
 if __name__ == '__main__':
     try:
         recording()
