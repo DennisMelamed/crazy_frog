@@ -1,8 +1,8 @@
 (dp0
 I0
-S'../classification_data/middleFingerRawData.pkl'
+S'../classification_data/1RawData.pkl'
 p1
 sI1
-S'../classification_data/indexFingerRawData.pkl'
+S'../classification_data/waitRawData.pkl'
 p2
 s.
