@@ -16,13 +16,13 @@ program_counter = 0
 most_recent_number_run = -1
 
 def getGesture():
-	rospy.init_node('crazyFrog/gesture_to_macro_translator', anonymous=True)
+	rospy.init_node('crazyFrog/compiler_gesture_reciever', anonymous=True)
     sub = rospy.Subscriber('crazyFrog/current_gesture', Int32 , processGesture)
     rospy.spin()
         
 def broadcastProgram():
-    rospy.init_node('Compiler', anonymous=True)
-    pub = rospy.Publisher('current_program', String, queue_size=10)
+    rospy.init_node('crazyFrog/compiler_macro_publisher', anonymous=True)
+    pub = rospy.Publisher('crazyFrog/current_program', String, queue_size=10)
     rate = rospy.Rate(10) # 10hz
     while program_counter > 0 and not rospy.is_shutdown():
         program_str = str(program_counter) + ',' + str(most_recent_number_run)
