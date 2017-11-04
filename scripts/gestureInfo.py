@@ -1,5 +1,8 @@
 from numpy import dot
 
+macro_folder = "../macros/"
+file_ext = ".csv"
+
 # Index of Gestures
 Digit = 14
 Negate = 15
@@ -15,13 +18,6 @@ MoveZ = 19
 Wait = 20
 actions = [CallMacro, MoveX, MoveY, MoveZ, Wait]
 NOP = 21
-
-
-legal_gestures_in_scope = {	# Each scope is mapped to a dictionary containing gestures allowed after the previous input
-	"Idle":			idle_legal_gestures,
-	"Recording":	recording_legal_gestures,
-	"Repeating":	repeating_legal_gestures,
-	}
 	
 idle_legal_gestures = {
 	0: 	[11,14],	# 0 is the digit 0
@@ -84,24 +80,9 @@ repeating_legal_gestures = {
 	18:	[11,14],	# 18 is move in the y direction (backward is negative, forward is positive)). Expects a number (of decimeters) to move next
 	19:	[11,14],	# 19 is move in the z direction (down is negative, up is positive). Expects a number (of decimeters) to move next
 	20:	[11,14],	# 20 is the wait command. (Expects a number (of seconds) to wait next
+	}	
+legal_gestures_in_scope = {	# Each scope is mapped to a dictionary containing gestures allowed after the previous input
+	"Idle":			idle_legal_gestures,
+	RecordMacro:	recording_legal_gestures,
+	Repeat:	repeating_legal_gestures,
 	}
-	
-	
-##############################
-#
-#	Converts digits to the actual number it represents
-#	-There's probably a more elegant way to do this.  
-#   -One alternative is to store the digits in a string and concatenate, 
-#	 then convert the string directly to an integer and multiply by the sign...
-#
-###############################
-def digitsToNumber():	
-	global digits
-	sign = digits[0]
-	length = len(digits)-1
-	if length is not 0:
-		powers = [10**(length-n-1) for n in range(0,length)]
-		num = sign *sum([digits[n]*powers[n-1] for n in range(1,length+1)])
-		return num
-	else:
-		return 0

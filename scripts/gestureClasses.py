@@ -4,7 +4,7 @@ from gestureInfo import *
 
 ###############################################################################
 #	
-#	Action Block: 
+#	ActionBlock: 
 #
 #	contains an action (any command that just takes a number as an argument)
 #	as well as its argument number
@@ -12,16 +12,20 @@ from gestureInfo import *
 #
 ###############################################################################
 class ActionBlock:
-	def __init__(self, action_type ,number=NaN):
+
+	def __init__(self, action_type):
 		self.action_type = action_type
-		self.number = number
+		self.number = 0
 	
-	def getNumber(self, num):
+	def getActionType(self):
+		return self.action_type
+		
+	def getNumber(self):
 		return self.number
 		
 	# set the number value for this action
 	def setNumber(self, num):
-		if action_type is not CallMacro:
+		if self.action_type is not CallMacro:
 			if num == 0:
 				raise ZeroActionException('Ignore action')
 			else:
@@ -36,27 +40,98 @@ class ActionBlock:
 		return
 		
 	# outputs a string for an action, or the string from a called macro
-	def stringifyMeCapN():
+	def stringifyMeCapN(self):
 		if self.action_type is MoveX:
-			return 'x(' + str(number)+')\n'
+			action_string= 'x(' + str(self.number)+')'
 		elif self.action_type is MoveY:
-			return 'y(' + str(number)+')\n'
+			action_string= 'y(' + str(self.number)+')'
 		elif self.action_type is MoveZ:
-			return 'y(' + str(number)+')\n'
+			action_string= 'z(' + str(self.number)+')'
 		elif self.action_type is Wait:
-			return 'w(' + str(number)+')\n'
+			action_string= 'w(' + str(self.number)+')'
 		elif self.action_type is CallMacro:
-			action_string = ""
-			csv.register_dialect('recorded_macro', delimiter='\n', quoting=csv.QUOTE_MINIMAL)
-			with open(macro_folder + 'macro' + str(num) + file_ext, 'rb') as macro_file:
-    				macro = csv.reader(macro_file, 'recorded_macro')
-    				for action in macro:
-    					action_string = action_string + str(action)+'\n'
-			return action_string
+			try:
+				action_string = ""
+				#csv.register_dialect('recorded_macro', delimiter='\n', quoting=csv.QUOTE_NONE)
+				with open(macro_folder + 'macro' + str(self.number) + file_ext, 'rb') as macro_file:
+						macro = csv.reader(macro_file)#, 'recorded_macro')
+						for action in macro:
+							action_string = action_string + str(action[0])
+			except Exception as e:
+			# this should only occur if a macro file being called was deleted by the user after it was recorded, but before it was called
+				print(e)	
 		else:
-			return ''
+			action_string= ''
+		return action_string
+			
+	def __str__(self):
+		if self.action_type is MoveX:
+			description= 'x(' + str(self.number)+')'
+		elif self.action_type is MoveY:
+			description= 'y(' + str(self.number)+')'
+		elif self.action_type is MoveZ:
+			description= 'z(' + str(self.number)+')'
+		elif self.action_type is Wait:
+			description= 'w(' + str(self.number)+')'
+		elif self.action_type is CallMacro:
+			description= 'Call macro ' + str(self.number)
+		return description
+
+###############################################################################
+#	
+#	ScopeBlock: 
+#
+#	scope_type: 	Repeat or RecordMacro 
+#	number:			number of times to repeat or number macro being recorded
+#	action_list:	list of ActionBlocks which can be added to or converted to a string for export to a csv when writing macros
+#
+###############################################################################
+class ScopeBlock:
+	def __init__(self, scope_type):
+		self.scope_type = scope_type
+		self.action_list = []
+		self.number = -1
 		
+	def getScopeType(self):
+		return self.scope_type
+		
+	def getActionList(self):
+		return self.action_list
+		
+	def getNumber(self):
+		return self.number
+		
+	# set the number value for this action
+	def setNumber(self, num):
+		if self.scope_type is Repeat:
+			if num <= 0:
+				raise ZeroActionException('Ignore action')
+			else:
+				pass
+		self.number = num
+		
+	# adds actions to the action list
+	def addActionList(self, actions):
+		if type(actions) is not list:
+			actions = [actions]
+		self.action_list = self.action_list + actions
+		
+	# outputs a string for each action, or the string from a called macro
+	def stringifyMeCapN(self):
+		if len(self.action_list):
+			#print('Stringifying ' +self.__str__()+ ' <'+ ', '.join([str(act) for act in self.action_list])+'>')
+			return [act.stringifyMeCapN() for act in self.action_list]#reduce(
+				#(lambda x,y: x+y),					# concatenates
+				#[act.stringifyMeCapN() for act in self.action_list],'')	# strings from each action
+		else:
+			raise(ZeroActionException('!!!empty action_list in ScopeBlock being stringified!!!!'))
 	
+	def __str__(self):
+		if self.scope_type is RecordMacro:
+			description = "Record Scope for macro " + str(self.number)
+		else:
+			description = "Repeat Scope to repeat " + str(self.number) + " times"
+		return description
 		
 		
 class MacroCallError(Exception):
