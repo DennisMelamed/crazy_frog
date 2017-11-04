@@ -22,10 +22,10 @@ def getGesture():
         
 def broadcastProgram():
     rospy.init_node('Compiler', anonymous=True)
-    pub = rospy.Publisher('', String, queue_size=10)
+    pub = rospy.Publisher('current_program', String, queue_size=10)
     rate = rospy.Rate(10) # 10hz
     while program_counter > 0 and not rospy.is_shutdown():
-        program_str = str(program_counter)+str(most_recent_number_run)
+        program_str = str(program_counter) + ',' + str(most_recent_number_run)
         rospy.loginfo(program_str)
         pub.publish(program_str)
         rate.sleep()
