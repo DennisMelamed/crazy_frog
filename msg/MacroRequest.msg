@@ -1,0 +1,2 @@
+int32 program_counter
+int32 macro_number
