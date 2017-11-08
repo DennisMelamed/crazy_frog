@@ -68,15 +68,13 @@ def callback(data):
                 data.pinky_tip.x,           data.pinky_tip.y,          data.pinky_tip.z,]
 
     
-    
+    print classifier.predict([X])[0]    
     circular_buffer = shift(circular_buffer, 1, classifier.predict([X])[0])
     mode = stats.mode(circular_buffer, axis=None)
-    rospy.loginfo(np.array_str(circular_buffer))
-    rospy.loginfo(classifier.predict([X])[0])
-    rospy.loginfo(str(mode[0][0]) + " " + str(previous_gesture))
-    if mode[0][0] != previous_gesture:
-        pub.publish(mode[0][0])
-        previous_gesture = mode[0][0]
+#    print mode[0][0]
+#    if mode[0][0] != previous_gesture:
+    pub.publish(mode[0][0])
+    previous_gesture = mode[0][0]
 
 
 def recording():

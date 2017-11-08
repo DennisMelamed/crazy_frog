@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
 
-numPointsToCollect = 10
+numPointsToCollect = 1500
 n_neighbors = 2
 i = 0
 X = np.empty([numPointsToCollect,87], dtype=float)
@@ -21,10 +21,10 @@ def spitOutResults():
     global printflag
     global X, y
     if not printflag:
-        with open("../classification_data/" + rospy.get_param('/gesture_name') + 'RawData.pkl', 'wb') as f:
+        with open("../classification_data/" + str(rospy.get_param('/gesture_name')) + 'RawData.pkl', 'wb') as f:
             pickle.dump(X, f)
-        print X
         printflag = True
+        print "done!"
 
 
 def callback(data):
@@ -66,7 +66,6 @@ def callback(data):
 
         y[i] = (int(data.direction.z))
         i = i+1
-        print "collected " + str(i) + " samples"
     else:
         spitOutResults()
 

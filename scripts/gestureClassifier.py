@@ -17,18 +17,18 @@ gesture_class_nums = {  "0":0,
                         "7":7,
                         "8":8,
                         "9":9,
-                        "run":10,
-                        "end":11,
-                        "record":12,
-                        "call":13,
-                        "digit":14,
-                        "negate":15,
-                        "repeat":16,
-                        "x":17,
-                        "y":18,
-                        "z":19,
-                        "wait":20,
-                        "nop":21 }
+                        "Run":10,
+                        "END":11,
+                        "RecordMacro":12,
+                        "CallMacro":13,
+                        "Digit":14,
+                        "Negate":15,
+                        "Repeat":16,
+                        "MoveX":17,
+                        "MoveY":18,
+                        "MoveZ":19,
+                        "Wait":20,
+                        "NOP":21 }
 
 
 
@@ -46,7 +46,7 @@ if not os.path.exists(out_folder):
 # find pickles in input folder
 pickled_gestures = glob.glob(inp_folder + "*" + file_extension)
 
-print pickled_gestures
+
 # format data into np.arrays 
 #	gesture_data is the dataset
 #	class_data is the corresponding class for each row
@@ -76,10 +76,10 @@ output.close()
 #for weights in ['uniform', 'distance']:
 weights = 'distance'  
       # we create an instance of Neighbours Classifier and fit the data.
-print len(gesture_data)
-print len(gesture_data[0])
-print len(class_data)
-print class_data
+print "len of gesture Data: " +str(len(gesture_data))
+print "len of gesture data[0]: " + str(len(gesture_data[0]))
+print "len of class data: " + str(len(class_data))
+print "class data : " + str(class_data)
 classy_mammer_jammer = neighbors.KNeighborsClassifier(n_neighbors, weights=weights)
 classy_mammer_jammer.fit(gesture_data, class_data[0])
 
