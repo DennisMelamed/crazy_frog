@@ -1,5 +1,4 @@
-int32 current_number
-int32 previous_gesture
-int32 current_action_block
-std::string scopes
-	
+Int32 current_number
+Int32 previous_gesture
+string current_action_block
+string scopes
