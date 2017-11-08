@@ -46,6 +46,8 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>angle</build_depend>
   <build_depend>roslib</build_depend>
+  <build_depend>message_runtime</build_depend>
+  <run_depend>message_runtime</run_depend>
   <run_depend>angle</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>

@@ -222,7 +222,7 @@ def processGesture(gesture):
 	global previous_gesture
 	global current_action
 	current_gesture = gesture.data
-	if current_gesture == NOP:	# 21 is a No op, do nothing
+	if current_gesture not in gestures:	# if not a recognized action, do nothing
 		return
 	else:
 		legal_gestures = getLegalGestures()

@@ -4,6 +4,7 @@ macro_folder = "../macros/"
 file_ext = ".csv"
 
 # Index of Gestures
+gestures = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
 Digit = 14
 Negate = 15
 numbers = [0,1,2,3,4,5,6,7,8,9,Digit,Negate]

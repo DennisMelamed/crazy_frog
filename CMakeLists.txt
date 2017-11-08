@@ -12,11 +12,22 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   gazebo_msgs
   tf
+  message_generation
+)
+
+add_message_files(
+	FILES
+	MacroRequest.msg
+)
+generate_messages(
+	DEPENDENCIES
+	std_msgs
 )
 
 catkin_package(
-
+	CATKIN_DEPENDS message_runtime
 )
+
 
 
 include_directories(
@@ -24,3 +35,5 @@ include_directories(
 )
 
 
+add_executable(runtime src/runtime.cpp ${catkin_LIBRARIES})
+target_link_libraries(runtime ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
