@@ -19,7 +19,6 @@
 #include <string>
 
 #define POSITION_ERROR .1
-
 enum Direction{x, y, z};
 
 struct Command
@@ -132,6 +131,7 @@ void updateMessage(tf::StampedTransform& transform)
 	  	msg.pose.position.x = (current.a == x) ? (msg.pose.position.x + current.amount) : (msg.pose.position.x);	
 	  	msg.pose.position.y = (current.a == y) ? (msg.pose.position.y + current.amount) : (msg.pose.position.y);	
 	  	msg.pose.position.z = (current.a == z) ? (msg.pose.position.z + current.amount) : (msg.pose.position.z);	
+		init(transform);
       }
 }
 
