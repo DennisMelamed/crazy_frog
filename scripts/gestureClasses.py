@@ -42,13 +42,13 @@ class ActionBlock:
 	# outputs a string for an action, or the string from a called macro
 	def stringifyMeCapN(self):
 		if self.action_type is MoveX:
-			action_string= 'x(' + str(self.number)+')'
+			action_string= 'x ' + str(self.number)
 		elif self.action_type is MoveY:
-			action_string= 'y(' + str(self.number)+')'
+			action_string= 'y ' + str(self.number)
 		elif self.action_type is MoveZ:
-			action_string= 'z(' + str(self.number)+')'
+			action_string= 'z ' + str(self.number)
 		elif self.action_type is Wait:
-			action_string= 'w(' + str(self.number)+')'
+			action_string= 'w ' + str(self.number)
 		elif self.action_type is CallMacro:
 			try:
 				action_string = ""
