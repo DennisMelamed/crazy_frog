@@ -71,16 +71,18 @@ def callback(data):
     print classifier.predict([X])[0]    
     circular_buffer = shift(circular_buffer, 1, classifier.predict([X])[0])
     mode = stats.mode(circular_buffer, axis=None)
-#    print mode[0][0]
-#    if mode[0][0] != previous_gesture:
-    pub.publish(mode[0][0])
-    previous_gesture = mode[0][0]
+    print mode[0][0]
+    print '--'
+    if mode[0][0] != previous_gesture:
+        pub.publish(mode[0][0])
+        previous_gesture = mode[0][0]
 
 
 def recording():
         global classifier 
         global pub
         classifier = pickle.load(open("../classification_data/classifier_output/classifier.pkl"))
+        print 'pickled classifier opened'
         rospy.init_node('gestureRecognizer', anonymous=True)
         sub = rospy.Subscriber('leapmotion/data', leapros , callback)
         pub = rospy.Publisher('crazyFrog/current_gesture', Int32, queue_size = 10)
