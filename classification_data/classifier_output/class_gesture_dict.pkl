@@ -57,9 +57,12 @@ sI18
 S'../classification_data/RecordMacroRawData.pkl'
 p19
 sI19
-S'../classification_data/NegateRawData.pkl'
+S'../classification_data/RunRawData.pkl'
 p20
 sI20
-S'../classification_data/2RawData.pkl'
+S'../classification_data/NegateRawData.pkl'
 p21
+sI21
+S'../classification_data/2RawData.pkl'
+p22
 s.
