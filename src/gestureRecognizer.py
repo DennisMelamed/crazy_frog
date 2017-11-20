@@ -18,6 +18,68 @@ classifier = None
 circular_buffer = np.empty([300], dtype=float)
 previous_gesture = None
 
+
+
+gesture_class_nums = {  "0":0,#
+                        "1":1,#
+                        "2":2,#
+                        "3":3,#
+                        "4":4,#
+                        "5":5,#
+                        "6":6,#
+                        "7":7,#
+                        "8":8,#
+                        "9":9,#
+                        "Run":10,#
+                        "END":11,#
+                        "RecordMacro":12,#
+                        "CallMacro":13,#
+                        "Digit":14,#
+                        "Negate":15,#
+                        "Repeat":16,
+                        "MoveX":17,
+                        "MoveY":18,
+                        "MoveZ":19,
+                        "Wait":20,
+                        "NOP":21 }#
+gesture_friendly_names = ['0',
+                           '1',
+                           '2',
+                           '3',
+                           '4',
+                           '5',
+                           '6',
+                           '7',
+                           '8',
+                           '9',
+                           'Run',
+                           'END',
+                           'RecordMacro',
+                           'CallMacro',
+                           'Digit',
+                           'Negate',
+                           'Repeat',
+                           'MoveX',
+                           'MoveY',
+                           'MoveZ',
+                           'Wait',
+                           'NOP']
+
+
+
+
+
+# How many neighbors do happy villagers have?
+n_neighbors = 5
+
+# import data
+file_extension = "pkl"
+inp_folder = "../classification_data/"
+
+out_folder = inp_folder + "classifier_output/"
+
+
+
 def shift(arr, num, fill_value=np.nan):
     result = np.empty_like(arr)
     if num > 0:
@@ -72,6 +134,7 @@ def callback(data):
     circular_buffer = shift(circular_buffer, 1, classifier.predict([X])[0])
     mode = stats.mode(circular_buffer, axis=None)
     print mode[0][0]
+    print gesture_friendly_names[int(mode[0][0])]
     print '--'
     if mode[0][0] != previous_gesture:
         pub.publish(mode[0][0])
