@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>crazyFrog</name>
+  <name>crazy_frog</name>
   <version>0.0.0</version>
-  <description>The crazyFrog package</description>
+  <description>The crazy_frog package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
