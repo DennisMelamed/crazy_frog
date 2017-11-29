@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+
 import rospy
+
 import csv
 from std_msgs.msg import Int32
 from std_msgs.msg import String
+from crazy_frog.msg import *
 from gestureClasses import *
 from gestureInfo import *
 
@@ -15,40 +19,7 @@ scopes = ["Idle"] 	# will be used as a stack to push and pop ScopeBlock objects.
 program_counter = 0
 most_recent_number_run = -1
 
-def getGesture():
-	rospy.init_node('crazyFrog/compiler_gesture_reciever', anonymous=True)
-    sub = rospy.Subscriber('crazyFrog/current_gesture', Int32 , processGesture)
-    rospy.spin()
-        
-def broadcastData():
-    rospy.init_node('crazyFrog/compiler_macro_publisher', anonymous=True)
-    pub1 = rospy.Publisher('crazyFrog/current_program', MacroRequest, queue_size=10)
-    pub2 = rospy.Publisher('crazyFrog/compiler_data', CompilerData, queue_size=10
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown(): # and program_counter > 0
-		# Publish macro run request
-		# if program_counter = 0, then nothing should be run.
-    	macro_request = MacroRequest()
-    	macro_request.program_counter = program_counter
-    	macro_request.macro_number = most_recent_number_run
-        rospy.loginfo(macro_request)
-        pub1.publish(macro_request)
-        # Publish compiler data for GUI (or whatever else)
-        compiler_data = CompilerData()
-        compiler_data.current_number = digitsToNumber()
-		compiler_data.previous_gesture = previous_gesture
-		compiler_data.current_action_block = str(current_action)
-		compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
-        rospy.loginfo(compiler_data)
-        pub2.publish(compiler_data)
-        rate.sleep()
-	
-if __name__ == '__main__':
-    try:
-        getGesture()
-        broadcastData()
-    except rospy.ROSInterruptException:
-        pass
+
         
 #########
 #
@@ -252,3 +223,36 @@ def processGesture(gesture):
 	elif current_gesture is Repeat:
 		scopes.append(ScopeBlock(Repeat))
 	previous_gesture = current_gesture
+
+
+        
+def broadcastData():
+    rospy.init_node('compiler_macro_publisher', anonymous=True)
+    pub1 = rospy.Publisher('crazyFrog/current_program', MacroRequest, queue_size=10)
+    pub2 = rospy.Publisher('crazyFrog/compiler_data', CompilerData, queue_size=10)
+    sub = rospy.Subscriber('crazyFrog/current_gesture', Int32 , processGesture)
+
+    rate = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown(): # and program_counter > 0
+		# Publish macro run request
+		# if program_counter = 0, then nothing should be run.
+    	macro_request = MacroRequest()
+    	macro_request.program_counter = program_counter
+    	macro_request.macro_number = most_recent_number_run
+        rospy.loginfo(macro_request)
+        pub1.publish(macro_request)
+        # Publish compiler data for GUI (or whatever else)
+        compiler_data = CompilerData()
+        compiler_data.current_number = digitsToNumber()
+    	compiler_data.previous_gesture = previous_gesture
+    	compiler_data.current_action_block = str(current_action)
+    	compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
+        rospy.loginfo(compiler_data)
+        pub2.publish(compiler_data)
+        rate.sleep()
+	
+if __name__ == '__main__':
+    try:
+        broadcastData()
+    except rospy.ROSInterruptException:
+        pass

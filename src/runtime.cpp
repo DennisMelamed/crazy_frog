@@ -73,7 +73,7 @@ void updateTransform(tf::StampedTransform& transform, tf::TransformListener& lis
 {
 	try
 	{
-		listener.lookupTransform("/downward_cam_optical_frame", "/ar_marker_3", ros::Time(0), transform);
+		listener.lookupTransform("/cam_pos", "/world", ros::Time(0), transform);
 	}
 	catch (tf::TransformException ex)
 	{
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 
 
   	ros::Publisher  pub  =nh.advertise<geometry_msgs::PoseStamped>("/goal", 100);
- 	ros::Subscriber sub  =nh.subscribe("/currentProgram", 100, programCallback);
+ 	ros::Subscriber sub  =nh.subscribe("/crazyFrog/currentProgram", 100, programCallback);
 
    	tf::StampedTransform transform;
    	tf::TransformListener listener;
