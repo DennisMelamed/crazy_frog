@@ -89,6 +89,7 @@ def endHandler():
 	global most_recent_number_run
 	if previous_gesture in numbers:
 		num = digitsToNumber()
+		digits = [1]
 		if current_action is not None and scopes[-1] is not "Idle":
 			actionSuccessful = False
 			try:
@@ -168,6 +169,9 @@ def numberHandler(gesture):
 			digits = [1]			  							
 	elif gesture is Negate:	
 		digits[0] == -1*digits[0] # swaps sign on current_digits
+	elif previous_gesture in numbers[:10]
+	# Replace current digit with newest number
+		digits[-1] = gesture
 	else:	
 	# Handle when gesture is a place value for a digit (0-9)
 		digits.append(gesture)
