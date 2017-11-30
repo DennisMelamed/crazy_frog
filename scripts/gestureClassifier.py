@@ -41,7 +41,7 @@ gesture_class_nums = {  "0":0,#
 
 
 # How many neighbors do happy villagers have?
-n_neighbors = 5
+n_neighbors = 200
 
 # import data
 file_extension = "pkl"
