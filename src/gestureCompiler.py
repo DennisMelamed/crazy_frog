@@ -219,7 +219,7 @@ def processGesture(gesture):
 	if current_gesture in numbers:
 		numberHandler(current_gesture)
 	elif current_gesture in actions:
-		current_action = ActionBlock(current_gesture)
+		current_action = ActionBlock(current_gesture) # changes the current action if no digits have been specificed yet.
 	elif current_gesture is END:
 		endHandler()
 	elif current_gesture is RecordMacro:
