@@ -169,7 +169,7 @@ def numberHandler(gesture):
 			digits = [1]			  							
 	elif gesture is Negate:	
 		digits[0] == -1*digits[0] # swaps sign on current_digits
-	elif previous_gesture in numbers[:10]
+	elif previous_gesture in numbers[:10]:
 	# Replace current digit with newest number
 		digits[-1] = gesture
 	else:	
