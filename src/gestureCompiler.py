@@ -15,6 +15,9 @@ current_action = None	# in progress construction of an ActionBlock, type can be 
 digits = [1]		# current number in progress
 scopes = ["Idle"] 	# will be used as a stack to push and pop ScopeBlock objects. "Idle" is a parent node that should never be popped/
 					# Possible scopes:	"Idle", RecordMacro, Repeat
+recording_number = False
+calling_number = False
+number_name =[]
 
 program_counter = 0
 most_recent_number_run = -1
@@ -53,7 +56,24 @@ def writeRecordedMacroToCSV(record_block):
 	with open(macro_folder + "macro" + str(num)+ file_ext, 'wb') as csv_file:
 			macroWriter = csv.writer(csv_file, delimiter='\n')
 			macroWriter.writerow(action_string_list)
-    
+  
+  
+def writeNumber(num):
+	global number_name
+	number_dict = pickle.load(open("../variables/number_vars.pkl"))
+	number_dict[tuple(number_name)] = num
+	with open("../variables/number_vars.pkl", 'wb') as output:
+		pickle.dump(number_dict, output)
+	number_name = []
+	
+def callNumber():
+	global number_name
+	number_dict = pickle.load(open("../variables/number_vars.pkl"))
+	if tuple(number_name) in number_dict:
+		num = number_dict[tuple(number_name)]
+	else:
+		raise numberVariableNotFoundError("The number you tried to call does not exist")
+	number_name = []
 ##############
 #
 #	returns which gestures are allowed from the current state
@@ -62,7 +82,9 @@ def writeRecordedMacroToCSV(record_block):
 def getLegalGestures():
 	global previous_gesture
 	global scopes
-	if scopes[-1] is "Idle":
+	if	recording_number or calling_number:
+		return gestures
+	elif scopes[-1] is "Idle":
 		return idle_legal_gestures[previous_gesture]
 	else:
 		legal_gestures = legal_gestures_in_scope[scopes[-1].getScopeType()] # gets dictionary of legal gestures for current scope
@@ -71,7 +93,55 @@ def getLegalGestures():
 
 
 
-
+def handleEndOfNumber(num = digitsToNumber()):
+	global scopes
+	global digits
+	global previous_gesture
+	global current_action
+	global program_counter
+	global most_recent_number_run
+	global recording_number
+	global calling_number
+	global number_name
+	
+	digits = [1]
+	if recording_number and rec_number_name[-1] is END:
+		if len(number_name) > 1:
+			writeNumber(num)
+		recording_number = False
+	if current_action is not None and scopes[-1] is not "Idle":
+		actionSuccessful = False
+		try:
+			current_action.setNumber(num)
+			actionSuccessful = True
+		except MacroCallError as err:
+			# this should only happen if a called macro does not exist
+			print(err)
+			# in this branch successful remains False because the action of calling a non-existant macro is impossible
+		except ZeroActionException:
+			# in this branch successful remains False because the action was to do nothing, so nothing is added to the repeat/record scopes
+			pass
+		# Now we add the completed action if successful
+		if actionSuccessful and scopes[-1].getScopeType() in [Repeat,RecordMacro]:
+			scopes[-1].addActionList(current_action)
+		current_action = None
+	else: 
+	# Current action was None
+		if scopes[-1] is "Idle":
+			# the only way to get to Idle from numbers is to finish a run call
+			# so this publishes which macro to run if it exists
+			try:
+				runMacro(num)
+			except MacroCallError as err:
+				print(err)
+		elif scopes[-1].getScopeType() is Repeat and num <= 0:
+			# do nothing if we repeat <=  0 times
+			# so remove the repeat scope from stack
+			scopes.pop()
+		else:
+			# the  only way to arrive here is assigning a valid number of times to repeat or number to macro for recording
+			scopes[-1].setNumber(num)
+	
 ##############################
 #
 #	endHandler()
@@ -87,42 +157,20 @@ def endHandler():
 	global current_action
 	global program_counter
 	global most_recent_number_run
-	if previous_gesture in numbers:
-		num = digitsToNumber()
-		digits = [1]
-		if current_action is not None and scopes[-1] is not "Idle":
-			actionSuccessful = False
-			try:
-				current_action.setNumber(num)
-				actionSuccessful = True
-			except MacroCallError as err:
-				# this should only happen if a called macro does not exist
-				print(err)
-				# in this branch successful remains False because the action of calling a non-existant macro is impossible
-			except ZeroActionException:
-				# in this branch successful remains False because the action was to do nothing, so nothing is added to the repeat/record scopes
-				pass
-			# Now we add the completed action if successful
-			if actionSuccessful and scopes[-1].getScopeType() in [Repeat,RecordMacro]:
-				scopes[-1].addActionList(current_action)
-			current_action = None
-		else: 
-		# Current action was None
-			if scopes[-1] is "Idle":
-				# the only way to get to Idle from numbers is to finish a run call
-				# so this publishes which macro to run if it exists
-				try:
-					runMacro(num)
-				except MacroCallError as err:
-					print(err)
-			elif scopes[-1].getScopeType() is Repeat and num <= 0:
-				# do nothing if we repeat <=  0 times
-				# so remove the repeat scope from stack
-				scopes.pop()
-			else:
-				# the  only way to arrive here is assigning a valid number of times to repeat or number to macro for recording
-				scopes[-1].setNumber(num)
-				
+	global recording_number
+	global calling_number
+	
+	if calling_number and number_name[-1] is END:
+		try:
+			handleEndOfNumber(num = callNumber())
+		except numberVariableNotFoundError as err:
+			print err
+		calling_number = False
+	elif previous_gesture in [CallNumberVar,RecordNumberVar]:
+		calling_number = False
+		recording_number = False
+	elif previous_gesture in numbers:
+		handleEndOfNumber()
 	# previous gesture not number		
 	elif previous_gesture in [RecordMacro, Repeat]: 
 	# cancelling record/repeat command and ends the scope they started
@@ -216,12 +264,18 @@ def processGesture(gesture):
 		legal_gestures = getLegalGestures()
 		if current_gesture not in legal_gestures:
 			return
-	if current_gesture in numbers:
+	if current_gesture is END:
+		endHandler()
+	if recording_number or calling_number:
+		number_name.append(current_gesture) # must come after endHandler() so that the last gesture is end in the name of the variable.
+	elif current_gesture is RecordNumberVar:
+		recording_number = True
+	elif current_gesture is CallNumberVar:
+		calling_number = True
+	elif current_gesture in numbers:
 		numberHandler(current_gesture)
 	elif current_gesture in actions:
 		current_action = ActionBlock(current_gesture) # changes the current action if no digits have been specificed yet.
-	elif current_gesture is END:
-		endHandler()
 	elif current_gesture is RecordMacro:
 		scopes.append(ScopeBlock(RecordMacro))
 	elif current_gesture is Repeat:
