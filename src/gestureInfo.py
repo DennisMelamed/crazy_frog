@@ -21,66 +21,66 @@ actions = [CallMacro, MoveX, MoveY, MoveZ, Wait]
 NOP = 21
 	
 idle_legal_gestures = {
-	0: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 0 is the digit 0
-	1: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 1 is the digit 1
-	2: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 2 is the digit 2
-	3: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 3 is the digit 3
-	4: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 4 is the digit 4
-	5: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 5 is the digit 5
-	6: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 6 is the digit 6
-	7: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 7 is the digit 7
-	8:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 8 is the digit 8
-	9:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 9 is the digit 9
-	14:	[0,1,2,3,4,5,6,7,8,9,15],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
-	15:	[0,1,2,3,4,5,6,7,8,9],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign)  
-	10: [11,14],	# 10 is the run command which takes a number (which previously recorded macro to run)  as a parameter
-	11: [10,12],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	0: 	numbers+[END],	# 0 is the digit 0
+	1: 	numbers+[END],	# 1 is the digit 1
+	2: 	numbers+[END],	# 2 is the digit 2
+	3: 	numbers+[END],	# 3 is the digit 3
+	4: 	numbers+[END],	# 4 is the digit 4
+	5: 	numbers+[END],	# 5 is the digit 5
+	6: 	numbers+[END],	# 6 is the digit 6
+	7: 	numbers+[END],	# 7 is the digit 7
+	8:	numbers+[END],	# 8 is the digit 8
+	9:	numbers+[END],	# 9 is the digit 9
+	Digit:	numbers[:10]+[Negate]	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
+	Negate:	numbers[:10],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign)  
+	Run: [END,Digit],	# 10 is the run command which takes a number (which previously recorded macro to run)  as a parameter
+	END: [Run,RecordMacro],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
 	}	# 21 is No op which if recognized, will be do nothing, but is mentioned here for completeness
 recording_legal_gestures = {
-	0: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 0 is the digit 0
-	1: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 1 is the digit 1
-	2: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 2 is the digit 2
-	3: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 3 is the digit 3
-	4: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 4 is the digit 4
-	5: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 5 is the digit 5
-	6: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 6 is the digit 6
-	7: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 7 is the digit 7
-	8:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 8 is the digit 8
-	9:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 9 is the digit 9
-	14:	[0,1,2,3,4,5,6,7,8,9,15],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
-	15:	[0,1,2,3,4,5,6,7,8,9],	# 15 is negation of a digit. (Can be used before any digit in a number to change the sign) 
-	11: [11,12,13,16,17,18,19,20],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
-	12:	[11,14],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
-	13:	[11,14],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
-	16:	[11,14],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 
+	0: 	numbers+[END],	# 0 is the digit 0
+	1: 	numbers+[END],	# 1 is the digit 1
+	2: 	numbers+[END],	# 2 is the digit 2
+	3: 	numbers+[END],	# 3 is the digit 3
+	4: 	numbers+[END],	# 4 is the digit 4
+	5: 	numbers+[END],	# 5 is the digit 5
+	6: 	numbers+[END],	# 6 is the digit 6
+	7: 	numbers+[END],	# 7 is the digit 7
+	8:	numbers+[END],	# 8 is the digit 8
+	9:	numbers+[END],	# 9 is the digit 9
+	Digit:	numbers[:10]+[Negate],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
+	Negate:	numbers[:10],	# 15 is negation of a digit. (Can be used before any digit in a number to change the sign) 
+	END: [END,RecordMacro,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	RecordMacro:	[END,Digit],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
+	CallMacro:	[END,Digit],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
+	Repeat:	[END,Digit],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 
 					# (If n is 0 or negative, nothing happens)
-	17:	[11,14],	# 17 is move in the x direction (left is negative, right is positive). Expects a number (of decimeters) to move next
-	18:	[11,14],	# 18 is move in the y direction (backward is negative, forward is positive)). Expects a number (of decimeters) to move next
-	19:	[11,14],	# 19 is move in the z direction (down is negative, up is positive). Expects a number (of decimeters) to move next
-	20:	[11,14],	# 20 is the wait command. (Expects a number (of seconds) to wait next
+	MoveX:	[END,Digit]+actions,	# 17 is move in the x direction (left is negative, right is positive). Expects a number (of decimeters) to move next
+	MoveY:	[END,Digit]+actions,	# 18 is move in the y direction (backward is negative, forward is positive)). Expects a number (of decimeters) to move next
+	MoveZ:	[END,Digit]+actions,	# 19 is move in the z direction (down is negative, up is positive). Expects a number (of decimeters) to move next
+	Wait:	[END,Digit]+actions,	# 20 is the wait command. (Expects a number (of seconds) to wait next
 	}	# 21 is No op which if recognized, will be do nothing, but is mentioned here for completeness
 repeating_legal_gestures = {	
-	0: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 0 is the digit 0
-	1: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 1 is the digit 1
-	2: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 2 is the digit 2
-	3: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 3 is the digit 3
-	4: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 4 is the digit 4
-	5: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 5 is the digit 5
-	6: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 6 is the digit 6
-	7: 	[0,1,2,3,4,5,6,7,8,9,11,14],	# 7 is the digit 7
-	8:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 8 is the digit 8
-	9:	[0,1,2,3,4,5,6,7,8,9,11,14],	# 9 is the digit 9
-	14:	[0,1,2,3,4,5,6,7,8,9,15],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed. 
-	15:	[0,1,2,3,4,5,6,7,8,9],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign) 
-	11: [11,12,13,16,17,18,19,20],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
-	12:	[11,14],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
-	13:	[11,14],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
-	16:	[11,14],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 
+	0: 	numbers+[END],	# 0 is the digit 0
+	1: 	numbers+[END],	# 1 is the digit 1
+	2: 	numbers+[END],	# 2 is the digit 2
+	3: 	numbers+[END],	# 3 is the digit 3
+	4: 	numbers+[END],	# 4 is the digit 4
+	5: 	numbers+[END],	# 5 is the digit 5
+	6: 	numbers+[END],	# 6 is the digit 6
+	7: 	numbers+[END],	# 7 is the digit 7
+	8:	numbers+[END],	# 8 is the digit 8
+	9:	numbers+[END],	# 9 is the digit 9
+	Digit:	numbers[:10]+[Negate],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed. 
+	Negate:	numbers[:10],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign) 
+	END: [END,RecordMacro,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	RecordMacro:	[END,Digit],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
+	CallMacro:	[END,Digit],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
+	Repeat:	[END,Digit],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 
 					# (If n is 0 or negative, nothing happens)
-	17:	[11,14],	# 17 is move in the x direction (left is negative, right is positive). Expects a number (of decimeters) to move next
-	18:	[11,14],	# 18 is move in the y direction (backward is negative, forward is positive)). Expects a number (of decimeters) to move next
-	19:	[11,14],	# 19 is move in the z direction (down is negative, up is positive). Expects a number (of decimeters) to move next
-	20:	[11,14],	# 20 is the wait command. (Expects a number (of seconds) to wait next
+	MoveX:	[END,Digit]+actions,	# 17 is move in the x direction (left is negative, right is positive). Expects a number (of decimeters) to move next
+	MoveY:	[END,Digit]+actions,	# 18 is move in the y direction (backward is negative, forward is positive)). Expects a number (of decimeters) to move next
+	MoveZ:	[END,Digit]+actions,	# 19 is move in the z direction (down is negative, up is positive). Expects a number (of decimeters) to move next
+	Wait:	[END,Digit]+actions,	# 20 is the wait command. (Expects a number (of seconds) to wait next
 	}	
 legal_gestures_in_scope = {	# Each scope is mapped to a dictionary containing gestures allowed after the previous input
 	"Idle":			idle_legal_gestures,
