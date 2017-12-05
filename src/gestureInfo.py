@@ -31,7 +31,7 @@ idle_legal_gestures = {
 	7: 	numbers+[END],	# 7 is the digit 7
 	8:	numbers+[END],	# 8 is the digit 8
 	9:	numbers+[END],	# 9 is the digit 9
-	Digit:	numbers[:10]+[Negate]	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
+	Digit:	numbers[:10]+[Negate],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
 	Negate:	numbers[:10],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign)  
 	Run: [END,Digit],	# 10 is the run command which takes a number (which previously recorded macro to run)  as a parameter
 	END: [Run,RecordMacro],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)

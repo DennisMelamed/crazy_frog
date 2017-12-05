@@ -129,7 +129,7 @@ bool goalAchieved(tf::StampedTransform& transform)
    	{
    	     return true;
    	}
-	else
+	else if (wait_timer > 0)
 	{
 		wait_timer -= 1;
 	}
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 
 
   	ros::Publisher  pub  =nh.advertise<geometry_msgs::PoseStamped>("/goal", 100);
- 	ros::Subscriber sub  =nh.subscribe("/crazyFrog/currentProgram", 100, programCallback);
+ 	ros::Subscriber sub  =nh.subscribe("/crazyFrog/current_program", 100, programCallback);
 
    	tf::StampedTransform transform;
    	tf::TransformListener listener;
