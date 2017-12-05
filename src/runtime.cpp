@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	msg.pose.position.x = start_position.x;
 	msg.pose.position.y = start_position.y;
 	msg.pose.position.z = start_position.z;
-
+	msg.header.frame_id = "cam_pos";
    	while(ros::ok())
    	{
    		updateTransform(transform, listener);

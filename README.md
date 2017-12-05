@@ -5,6 +5,7 @@
 * numpy
 * tf
 * crazyflie_ros node
+* http://www.coppeliarobotics.com/files/tmp/
 
 ### Goals
 * Provide gestural macros for controlling microUAVs
