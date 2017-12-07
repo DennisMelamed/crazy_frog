@@ -20,8 +20,8 @@ MoveZ = 19
 Wait = 20
 actions = [CallMacro, MoveX, MoveY, MoveZ, Wait]
 NOP = 21
-RecordNumberVar = 22
-CallNumberVar = 23
+SetNumberVar = 22
+CallNumberVar = 15
 	
 def make_num_var_dict():	
 	rec_num_dict = {}
@@ -44,7 +44,7 @@ idle_legal_gestures = {
 	Digit:	numbers[:10]+[Negate]	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
 	Negate:	numbers[:10],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign)  
 	Run: [END,Digit,CallNumberVar],	# 10 is the run command which takes a number (which previously recorded macro to run)  as a parameter
-	END: [Run,RecordMacro,RecordNumberVar],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	END: [Run,RecordMacro,SetNumberVar],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
 	}	# 21 is No op which if recognized, will be do nothing, but is mentioned here for completeness
 number_var_name_legal_gestures = make_num_var_dict()
 recording_legal_gestures = {
@@ -60,7 +60,7 @@ recording_legal_gestures = {
 	9:	numbers+[END],	# 9 is the digit 9
 	Digit:	numbers[:10]+[Negate],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed.
 	Negate:	numbers[:10],	# 15 is negation of a digit. (Can be used before any digit in a number to change the sign) 
-	END: [END,RecordMacro,RecordNumberVar,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	END: [END,RecordMacro,SetNumberVar,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
 	RecordMacro:	[END,Digit,CallNumberVar],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
 	CallMacro:	[END,Digit,CallNumberVar],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
 	Repeat:	[END,Digit,CallNumberVar],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 
@@ -83,7 +83,7 @@ repeating_legal_gestures = {
 	9:	numbers+[END],	# 9 is the digit 9
 	Digit:	numbers[:10]+[Negate],	# 14 is the digit/number command. The next value should be the next digit in the number being constructed. 
 	Negate:	numbers[:10],	# 15 is negation of a digit.  (Can be used before any digit in a number to change the sign) 
-	END: [END,RecordMacro,RecordNumberVar,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
+	END: [END,RecordMacro,SetNumberVar,CallMacro,Repeat,MoveX,MoveY,MoveZ,Wait],	# 11 is the end scope/ cancel gesture (note: one frequently will have entered a scope from just ending a previous scope)
 	RecordMacro:	[END,Digit,CallNumberVar],	# 12 is the record macro command. The current scope is set to Recording and the next expected value should be a digit
 	CallMacro:	[END,Digit,CallNumberVar],	# 13 is the call macro commmand. The next expected value(s) should be a digit(s) (which previously recorded macro to call)
 	Repeat:	[END,Digit,CallNumberVar],	# 16 is the repeat command which starts a Repeating scope and takes first a number parameter n, then an arbitrary number of actions to repeat x times. 

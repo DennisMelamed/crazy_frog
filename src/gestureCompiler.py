@@ -191,7 +191,7 @@ def endHandler():
 		except numberVariableNotFoundError as err:
 			print err
 		calling_number = False
-	elif previous_gesture in [CallNumberVar,RecordNumberVar]:
+	elif previous_gesture in [CallNumberVar,SetNumberVar]:
 		calling_number = False
 		recording_number = False
 	elif previous_gesture in numbers:
@@ -293,7 +293,7 @@ def processGesture(gesture):
 		endHandler()
 	if recording_number or calling_number:
 		number_name.append(current_gesture) # must come after endHandler() so that the last gesture is end in the name of the variable.
-	elif current_gesture is RecordNumberVar:
+	elif current_gesture is SetNumberVar:
 		recording_number = True
 	elif current_gesture is CallNumberVar:
 		# CallNumberVar is overlaoded with the gesture of Negate, so here we check that it is not supposed to be Negate
