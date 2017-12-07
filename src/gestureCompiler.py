@@ -58,6 +58,15 @@ def writeRecordedMacroToCSV(record_block):
 			macroWriter.writerow(action_string_list)
   
   
+#########
+#
+#	writeNumber(num)
+#	
+#	adds the sequence of gestures to a pickled dictionary mapping sequences of gestures to preset numbers
+#	with this implementation, numerical veriable persist between uses, and a short python script can be written
+#		to prerecord any wanted numerical variables known to be needed in advance
+#
+#########
 def writeNumber(num):
 	global number_name
 	number_dict = pickle.load(open("../variables/number_vars.pkl"))
@@ -65,15 +74,23 @@ def writeNumber(num):
 	with open("../variables/number_vars.pkl", 'wb') as output:
 		pickle.dump(number_dict, output)
 	number_name = []
-	
+
+#########
+#
+#	callNumber()
+#	
+#	checks the pickled numerical variable dictionary for the sequence of gestures called.
+#
+#########	
 def callNumber():
 	global number_name
 	number_dict = pickle.load(open("../variables/number_vars.pkl"))
 	if tuple(number_name) in number_dict:
 		num = number_dict[tuple(number_name)]
 	else:
-		raise numberVariableNotFoundError("The number you tried to call does not exist")
+		raise numberVariableNotFoundError("The gestures you used do not correspond to a recorded numerical variable")
 	number_name = []
+	
 ##############
 #
 #	returns which gestures are allowed from the current state
@@ -92,7 +109,15 @@ def getLegalGestures():
 
 
 
-
+#########
+#
+#	handleEndOfNumber([num])
+#	
+#	handles when current_gesture is END and a number parameter has just been specified.
+#	[num] specifies which number is being used as a parameter.
+#	if [num] is not specified, the global variable digits is used as the number.
+#
+#########
 def handleEndOfNumber(num = digitsToNumber()):
 	global scopes
 	global digits
@@ -271,7 +296,9 @@ def processGesture(gesture):
 	elif current_gesture is RecordNumberVar:
 		recording_number = True
 	elif current_gesture is CallNumberVar:
-		calling_number = True
+		# CallNumberVar is overlaoded with the gesture of Negate, so here we check that it is not supposed to be Negate
+		if previous_gesture not in numbers:
+			calling_number = True
 	elif current_gesture in numbers:
 		numberHandler(current_gesture)
 	elif current_gesture in actions:
