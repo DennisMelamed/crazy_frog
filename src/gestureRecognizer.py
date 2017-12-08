@@ -11,6 +11,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
+import rospkg
 
 pub = None
 
@@ -73,8 +74,9 @@ gesture_friendly_names = ['0',
 n_neighbors = 5
 
 # import data
+rospack = rospkg.RosPack()
 file_extension = "pkl"
-inp_folder = "../classification_data/"
+inp_folder = rospack.get_path('crazy_frog') + "/classification_data/"
 
 out_folder = inp_folder + "classifier_output/"
 
@@ -144,7 +146,7 @@ def callback(data):
 def recording():
         global classifier 
         global pub
-        classifier = pickle.load(open("../classification_data/classifier_output/classifier.pkl"))
+        classifier = pickle.load(open(rospack.get_path('crazy_frog') + "/classification_data/classifier_output/classifier.pkl"))
         print 'pickled classifier opened'
         rospy.init_node('gestureRecognizer', anonymous=True)
         sub = rospy.Subscriber('leapmotion/data', leapros , callback)
