@@ -1,6 +1,9 @@
 from numpy import dot
+import rospkg
 
-macro_folder = "../macros/"
+rospack = rospkg.RosPack()
+
+macro_folder = rospack.get_path('crazy_frog') + "/macros/"
 file_ext = ".csv"
 
 # Index of Gestures

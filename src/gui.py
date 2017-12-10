@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import rospy
+import rospkg
 from tf import TransformListener
 from Tkinter import *
 from std_msgs.msg import *
 from crazy_frog.msg import *
+from geometry_msgs.msg import *
 from gestureInfo import *
 from os import listdir
 from os.path import isfile, join
@@ -17,7 +19,9 @@ legal_gestures = []
 current_pos = ""
 goal_pos = ""
 
-macro_path = "../macros/"
+r = rospkg.RosPack()
+
+macro_path = r.get_path('crazy_frog') + "/macros/"
 
 gesture_friendly_names = ['0',
                            '1',
@@ -61,8 +65,9 @@ def compilerCallback(data):
 	else:
 		legal_gestures = [gesture_friendly_names[x] for x in legal_gestures_in_scope[previous_gestures[-1]][data.previous_gesture]]
 
-#def runtimeCallback():
-	
+def runtimeCallback(data):
+	global goal_pos
+	goal_pos = "[" + str(data.pose.position.x) + ", "+ str(data.pose.position.y) + ", "+str(data.pose.position.z) + "]"
 def gestureCallback(data):
 	global current_gesture
 	current_gesture = data.data
@@ -79,7 +84,7 @@ def talker():
 
         pub = rospy.Publisher('info', String, queue_size=10)
 	compiler = rospy.Subscriber('crazyFrog/compiler_data', CompilerData, compilerCallback)
-	#runtime = rospy.Subscriber('crazyFrog/runtime_data', RuntimeData, runtimeCallback)
+	runtime = rospy.Subscriber('goal', PoseStamped, runtimeCallback)
 	gesture = rospy.Subscriber('crazyFrog/current_gesture', Int32, gestureCallback)
 	
 	tf = TransformListener()
@@ -221,33 +226,37 @@ def talker():
 
 
         while not rospy.is_shutdown():
-	    current_scopes_tk.set(current_scopes)
-	    current_action_block_tk.set(current_action_block)
-	    current_number_tk.set(current_number)
-            current_gesture_tk.set(str(gesture_friendly_names[current_gesture]))
-	    previous_gestures_tk.set(str(previous_gestures))
-	    legal_gestures_tk.set(str(legal_gestures))
+		current_scopes_tk.set(current_scopes)
+	    	current_action_block_tk.set(current_action_block)
+	    	current_number_tk.set(current_number)
+            	current_gesture_tk.set(str(gesture_friendly_names[current_gesture]))
+	    	previous_gestures_tk.set(str(previous_gestures))
+	    	legal_gestures_tk.set(str(legal_gestures))
 	    
-	    if tf.frameExists("/cam_pos") and tf.frameExists("/world"):
-		t = tf.getLatestCommonTime("/cam_pos","/world")
+#	    if tf.frameExists("/cam_pos") and tf.frameExists("/world"):
+	   	t = tf.getLatestCommonTime("/cam_pos","/world")
+		print t
 		current_pos, q = tf.lookupTransform("/cam_pos", "/world", t)
+		print current_pos
 		current_pos = str(current_pos)
-	    if tf.frameExists("/goal") and tf.frameExists("/world"):
-		t = tf.getLatestCommonTime("/goal", "/world")
-		goal_pos,q = tf.lookupTransform("/goal", "/world")
-		goal_pos = str(goal_pos)
-
+		current_pos_tk.set(current_pos)
 	    
-	    for f in listdir(macro_path):
-		if isfile(join(macro_path,f)) and f not in x:
-	    		macro_label = Label(frame_dir, text = f)
-			macro_label.pack()
+		for widget in frame_dir.winfo_children():
+		 	if not (widget.cget("text") in listdir(macro_path)):
+		 		widget.destroy()
+		
+		for f in listdir(macro_path) :
+			if isfile(join(macro_path,f)) and f not in x:
+	    			macro_label = Label(frame_dir, text = f)
+				x.append(f)
+				macro_label.pack()
+			
 
-	    rospy.loginfo(previous_gestures)
-            pub.publish(str(current_gesture))
-            rate.sleep()
-	    top.update_idletasks()
-	    top.update()
+		rospy.loginfo(previous_gestures)
+            	pub.publish(str(current_gesture))
+            	rate.sleep()
+	    	top.update_idletasks()
+	    	top.update()
 
 if __name__ == '__main__':
     try:

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   tf
   message_generation
+  roslib
 )
 
 add_message_files(
@@ -26,7 +27,7 @@ generate_messages(
 )
 
 catkin_package(
-	CATKIN_DEPENDS message_runtime
+	CATKIN_DEPENDS message_runtime roscpp roslib
 )
 
 

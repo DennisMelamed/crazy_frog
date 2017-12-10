@@ -17,6 +17,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <ros/package.h>
 
 #define POSITION_ERROR .1
 enum Direction{w, x, y, z};
@@ -35,22 +36,28 @@ struct Position
 } start_position;
 
 geometry_msgs::PoseStamped msg;
+std_msgs::String current_msg;
+std_msgs::String queue_msg;
 std::queue <Command> command_queue;
 int current_program_number = 0;
 int wait_timer = 0;
 
 void addMacroCommandsToQueue(int macro_number)
 {
-	char macro_num[3];
-	sprintf(macro_num,"%d",macro_number); 
-	ROS_INFO("macro number int: %d, macro number char: %c", macro_number, macro_num[0]);
-	std::string macro_n("../macros/macro");
-        macro_n.append(1, macro_num[0]);
-	macro_n.append(".csv");
-	
-	ROS_INFO("adding from file: %s" , macro_n.c_str());
+	//char macro_num[3];
+	//sprintf(macro_num,"%d",macro_number); 
+	//ROS_INFO("macro number int: %d, macro number char: %c", macro_number, macro_num[0]);
+	//std::string macro_n("../macros/macro");
+        //macro_n.append(1, macro_num[0]);
+	//macro_n.append(".csv");
 
-	std::ifstream macro_file(macro_n.c_str());
+	std::string package("crazy_frog");
+	std::stringstream file_path;
+	file_path << ros::package::getPath(package) << "/macros/macro" << macro_number << ".csv";
+	
+	ROS_INFO("adding from file: %s" , file_path.str().c_str());
+
+	std::ifstream macro_file(file_path.str().c_str());
 	std::string line;
 	while (std::getline(macro_file, line))
 	{
@@ -144,6 +151,9 @@ void updateMessage(tf::StampedTransform& transform)
       { 
 	      ROS_INFO("setting new goal pos");
 		current = command_queue.front();
+		std::stringstream current_string;
+		current_string << (char) current.a << " " << current.amount;
+		current_msg.data = current_string.str().c_str();
 		command_queue.pop();
 		ROS_INFO("setting new goal position with direction: %d, at point: %f", current.a, msg.pose.position.x+current.amount);
 		Direction a = x;
@@ -171,6 +181,8 @@ int main(int argc, char **argv)
 
 
   	ros::Publisher  pub  =nh.advertise<geometry_msgs::PoseStamped>("/goal", 100);
+	ros::Publisher  queue_pub = nh.advertise<std_msgs::String>("/crazyFrog/command_queue", 100);
+	ros::Publisher  current_pub = nh.advertise<std_msgs::String>("/crazyFrog/current_command",100);
  	ros::Subscriber sub  =nh.subscribe("/crazyFrog/current_program", 100, programCallback);
 
    	tf::StampedTransform transform;
@@ -193,6 +205,8 @@ int main(int argc, char **argv)
    		updateTransform(transform, listener);
    		updateMessage(transform);
    	   	pub.publish(msg);
+		queue_pub.publish(queue_msg);
+		current_pub.publish(current_msg);
    		rate.sleep();
    	}
    	return 0;
