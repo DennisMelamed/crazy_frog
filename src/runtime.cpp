@@ -44,12 +44,6 @@ int wait_timer = 0;
 
 void addMacroCommandsToQueue(int macro_number)
 {
-	//char macro_num[3];
-	//sprintf(macro_num,"%d",macro_number); 
-	//ROS_INFO("macro number int: %d, macro number char: %c", macro_number, macro_num[0]);
-	//std::string macro_n("../macros/macro");
-        //macro_n.append(1, macro_num[0]);
-	//macro_n.append(".csv");
 
 	std::string package("crazy_frog");
 	std::stringstream file_path;
@@ -71,6 +65,10 @@ void addMacroCommandsToQueue(int macro_number)
 		ROS_INFO("added command with direction: %d", new_command.a);
 		new_command.amount = b;
 		command_queue.push(new_command);
+		std::stringstream queue_string;
+		queue_string << queue_msg.data << "\n" << a << " " << b;
+		queue_msg.data = queue_string.str().c_str();
+		
 	}
 	
 }
@@ -149,11 +147,14 @@ void updateMessage(tf::StampedTransform& transform)
 	
       if(!command_queue.empty() && goalAchieved(transform))
       { 
-	      ROS_INFO("setting new goal pos");
+		ROS_INFO("setting new goal pos");
 		current = command_queue.front();
 		std::stringstream current_string;
-		current_string << (char) current.a << " " << current.amount;
+		current_string << (char) (current.a+119) << " " << current.amount;
 		current_msg.data = current_string.str().c_str();
+		std::string queue_string(queue_msg.data);
+		queue_string.erase(0, queue_string.find("\n")+1);
+		queue_msg.data = queue_string.c_str();
 		command_queue.pop();
 		ROS_INFO("setting new goal position with direction: %d, at point: %f", current.a, msg.pose.position.x+current.amount);
 		Direction a = x;
@@ -170,6 +171,11 @@ void updateMessage(tf::StampedTransform& transform)
 		ROS_INFO("actual goal pose set: %f, %f, %f", msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
 	  	// handle (current.a == w) // a wait command
 		init(transform);
+      }
+      if(command_queue.empty() && goalAchieved(transform))
+      {
+		current_msg.data = "";
+		queue_msg.data = "";
       }
 }
 
