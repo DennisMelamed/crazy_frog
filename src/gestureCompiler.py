@@ -119,7 +119,12 @@ def getLegalGestures():
 	global calling_number
 	global scopes
 	if	recording_number or calling_number:
-		return gestures
+		if not number_name or (number_name and number_name[-1] is not END):
+			return gestures
+		elif previous_gesture is END:
+			return [Digit,END]
+		else:
+			return idle_legal_gestures[previous_gesture] 
 	elif scopes[-1] is "Idle":
 		return idle_legal_gestures[previous_gesture]
 	else:
@@ -371,7 +376,11 @@ def broadcastData():
     		compiler_data.current_scope = ','.join([action.stringifyMeCapN() for action in scopes[-1].getActionList()])
     	else:
     		compiler_data.current_scope = "Idle"
-    	compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'
+    	if number_name and number_name[-1] is END:
+    		compiler_data.var_name = '('+ ','.join([str(n) for n in number_name[:-1]]) +')'	
+    	else:
+    		compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'	
+    	compiler_data.legal_gestures = ','.join([str(g) for g in getLegalGestures()])
         rospy.loginfo(compiler_data)
         pub2.publish(compiler_data)
         rate.sleep()
