@@ -119,7 +119,12 @@ def getLegalGestures():
 	global calling_number
 	global scopes
 	if	recording_number or calling_number:
-		return gestures
+		if not number_name or (number_name and number_name[-1] is not END):
+			return gestures
+		elif previous_gesture is END:
+			return [Digit,END]
+		else:
+			return idle_legal_gestures[previous_gesture] 
 	elif scopes[-1] is "Idle":
 		return idle_legal_gestures[previous_gesture]
 	else:
