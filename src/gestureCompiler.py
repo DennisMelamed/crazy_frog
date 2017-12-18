@@ -122,7 +122,7 @@ def getLegalGestures():
 		if not number_name or (number_name and number_name[-1] is not END):
 			return gestures
 		elif previous_gesture is END:
-			return [Digit]
+			return [Digit,END]
 		else:
 			return idle_legal_gestures[previous_gesture] 
 	elif scopes[-1] is "Idle":
@@ -242,7 +242,12 @@ def endHandler():
 		calling_number = False
 		recording_number = False
 	elif (calling_number or recording_number) and number_name and number_name[-1] is not END:
-			return # if we're recording number, we don't want any of the effects after this to occur
+		return # if we're recording number, we don't want any of the effects after this to occur
+	elif  (calling_number or recording_number) and number_name and number_name[-1] is END and previous_gesture is END:
+		# cancel recording or calling number after name has been started
+		calling_number = False
+		recording_number = False
+		return
 	elif previous_gesture in numbers:
 		handleEndOfNumber(digitsToNumber())
 	# previous gesture not number		
