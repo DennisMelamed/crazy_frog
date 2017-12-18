@@ -123,8 +123,10 @@ def getLegalGestures():
 			return gestures
 		elif previous_gesture is END:
 			return [Digit,END]
+		elif previous_gesture is not SetNumberVar:
+			return idle_legal_gestures[previous_gesture]
 		else:
-			return idle_legal_gestures[previous_gesture] 
+			return gestures 
 	elif scopes[-1] is "Idle":
 		return idle_legal_gestures[previous_gesture]
 	else:
@@ -238,16 +240,18 @@ def endHandler():
 		except numberVariableNotFoundError as err:
 			print err
 		calling_number = False
+		number_name = []
 	elif previous_gesture in [CallNumberVar,SetNumberVar]:
 		calling_number = False
 		recording_number = False
+		number_name = []
 	elif (calling_number or recording_number) and number_name and number_name[-1] is not END:
 		return # if we're recording number, we don't want any of the effects after this to occur
 	elif  (calling_number or recording_number) and number_name and number_name[-1] is END and previous_gesture is END:
 		# cancel recording or calling number after name has been started
 		calling_number = False
 		recording_number = False
-		
+		number_name = []
 		return
 	elif previous_gesture in numbers:
 		handleEndOfNumber(digitsToNumber())
