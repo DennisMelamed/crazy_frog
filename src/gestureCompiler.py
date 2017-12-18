@@ -242,7 +242,12 @@ def endHandler():
 		calling_number = False
 		recording_number = False
 	elif (calling_number or recording_number) and number_name and number_name[-1] is not END:
-			return # if we're recording number, we don't want any of the effects after this to occur
+		return # if we're recording number, we don't want any of the effects after this to occur
+	elif  (calling_number or recording_number) and number_name and number_name[-1] is END and previous_gesture is END:
+		# cancel recording or calling number after name has been started
+		calling_number = False
+		recording_number = False
+		return
 	elif previous_gesture in numbers:
 		handleEndOfNumber(digitsToNumber())
 	# previous gesture not number		
@@ -323,31 +328,31 @@ def processGesture(gesture):
 		legal_gestures = getLegalGestures()
 		if current_gesture not in legal_gestures:
 			return
-		elif current_gesture is END:
-			endHandler()
-		#
-		# print(number_name)
-		#
-		if (recording_number or calling_number) and (not number_name or number_name[-1] is not END):
-				number_name.append(current_gesture) # must come after endHandler() so that the last gesture is end in the name of the variable.
-		elif current_gesture is SetNumberVar:
-			recording_number = True
-		elif current_gesture is CallNumberVar:
-			# CallNumberVar is overlaoded with the gesture of Negate, so here we check that it is not supposed to be Negate
-			if previous_gesture not in numbers:
-				calling_number = True
-		elif current_gesture in numbers:
-			numberHandler(current_gesture)
-		elif current_gesture in actions:
-			current_action = ActionBlock(current_gesture) # changes the current action if no digits have been specificed yet.
-		elif current_gesture is RecordMacro:
-			# print("----\nIN RECORD BLOCK\n----")
-			# print(recording_number)
-			# print("----\nIN RECORD BLOCK\n----")
-			scopes.append(ScopeBlock(RecordMacro))
-		elif current_gesture is Repeat:
-			scopes.append(ScopeBlock(Repeat))
-		previous_gesture = current_gesture
+	if current_gesture is END:
+		endHandler()
+	#
+	# print(number_name)
+	#
+	if (recording_number or calling_number) and (not number_name or number_name[-1] is not END):
+			number_name.append(current_gesture) # must come after endHandler() so that the last gesture is end in the name of the variable.
+	elif current_gesture is SetNumberVar:
+		recording_number = True
+	elif current_gesture is CallNumberVar:
+		# CallNumberVar is overlaoded with the gesture of Negate, so here we check that it is not supposed to be Negate
+		if previous_gesture not in numbers:
+			calling_number = True
+	elif current_gesture in numbers:
+		numberHandler(current_gesture)
+	elif current_gesture in actions:
+		current_action = ActionBlock(current_gesture) # changes the current action if no digits have been specificed yet.
+	elif current_gesture is RecordMacro:
+		# print("----\nIN RECORD BLOCK\n----")
+		# print(recording_number)
+		# print("----\nIN RECORD BLOCK\n----")
+		scopes.append(ScopeBlock(RecordMacro))
+	elif current_gesture is Repeat:
+		scopes.append(ScopeBlock(Repeat))
+	previous_gesture = current_gesture
 
 
         
