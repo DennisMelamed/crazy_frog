@@ -247,6 +247,7 @@ def endHandler():
 		# cancel recording or calling number after name has been started
 		calling_number = False
 		recording_number = False
+		
 		return
 	elif previous_gesture in numbers:
 		handleEndOfNumber(digitsToNumber())
@@ -263,13 +264,15 @@ def endHandler():
 		if scopes[-1].getScopeType() is Repeat:
 			# we ended a repeat block, so let's add its action list repeated the appropriate # of times to the next scope
 			repeat_block = scopes.pop()
-			num = repeat_block.getNumber()
-			for n in range(num):
-				scopes[-1].addActionList(repeat_block.getActionList())	# repeats the actions in the repeat block the appropriate # of times
+			if repeat_block.getActionList():
+				num = repeat_block.getNumber()
+				for n in range(num):
+					scopes[-1].addActionList(repeat_block.getActionList())	# repeats the actions in the repeat block the appropriate # of times
 		else:
 		# we ended a macro recording, so let's write it to a file
 			record_block = scopes.pop()
-			writeRecordedMacroToCSV(record_block)
+			if record_block.getActionList():
+				writeRecordedMacroToCSV(record_block)
 	else:
 		print("End handler is missing something. previous_gesture was "+str(previous_gesture))
 
