@@ -11,6 +11,7 @@ from os import listdir
 from os.path import isfile, join
 
 current_scopes = ''
+current_scope = ''
 current_action_block = ''
 current_number = -1
 previous_gestures = ['NOP']
@@ -46,28 +47,27 @@ gesture_friendly_names = ['0',
                            'MoveY',
                            'MoveZ',
                            'Wait',
-                           'NOP']
+                           'NOP',
+                           'SetNumberVar']
+
 
 	
 
 
 def compilerCallback(data):
 	global current_scopes
+        global current_scope
 	global current_action_block
 	global current_number
 	global previous_gestures
 	global legal_gestures
 	current_scopes = data.scopes
+        current_scope = data.current_scope.split(",")
 	current_action_block = data.current_action_block
 	current_number = data.current_number
 	if previous_gestures[-1] != gesture_friendly_names[data.previous_gesture]:
 		previous_gestures.append(gesture_friendly_names[data.previous_gesture])
-	if current_scopes.split(",")[-1] == "Idle":
-		legal_gestures = [gesture_friendly_names[x] for x in legal_gestures_in_scope["Idle"][data.previous_gesture]]
-	elif "Record" in current_scopes.split(',')[-1]:
-		legal_gestures = [gesture_friendly_names[x] for x in legal_gestures_in_scope[12][data.previous_gesture]]
-	elif "Repeat" in current_scopes.split(',')[-1]:
-		legal_gestures = [gesture_friendly_names[x] for x in legal_gestures_in_scope[16][data.previous_gesture]]
+        legal_gestures = str([gesture_friendly_names[int(x)] for x in data.legal_gestures.split(",")])
 
 def runtimeCallback(data):
 	global goal_pos
@@ -86,7 +86,7 @@ def commandQueueCallback(data):
 
 def display_text(file_path, text_label):
 	global macro_path
-	print file_path
+	#print file_path
 	text_label.set("")
 	full_path = macro_path + file_path
 	with open(full_path) as f:
@@ -141,7 +141,7 @@ def talker():
 	#RIGHT SIDE OF WINDOW
 	m4 = PanedWindow(orient=VERTICAL)
         m4.pack(fill=BOTH, expand=1)
-        m4.config(showhandle=1, sashrelief=RAISED)	
+        m4.config(showhandle=0, sashrelief=RAISED)	
 	m4.add(m1)
 	m4.add(m2)
 	m4.add(m3)
@@ -149,12 +149,12 @@ def talker():
 	#DIRECTORY BAR
 	m5 = PanedWindow()
 	m5.pack(fill=BOTH, expand=1)
-	m5.config(showhandle=1, sashrelief=RAISED)
+	m5.config(showhandle=0, sashrelief=RAISED)
 
 	#MACRO DISPLAY WINDOW
 	m7 = PanedWindow()
 	m7.pack(fill=BOTH, expand=1)
-	m7.config(showhandle=1, sashrelief=RAISED)
+	m7.config(showhandle=0, sashrelief=RAISED)
 	
 
 	#OVERALL STRUCTURE
@@ -175,18 +175,16 @@ def talker():
 	#1,1
 	current_scopes_tk = StringVar()
 	current_scopes_tk.set(current_scopes)
-	frame1 = LabelFrame(top, text='Unclosed Scopes', width=200, height=200)
+	frame1 = LabelFrame(top, text='Unclosed Scopes', width=400, height=600)
 	unclosed_label = Label(frame1, textvariable=current_scopes_tk)
 	unclosed_label.pack()
 	m1.add(frame1)
 
-	#1,2
-	scope_queue = ""
-	current_scope = "Idle"
-	current_action = None
-	scope_queue_tk = StringVar()
-	frame2 = LabelFrame(top, text='Current Scope NOT RIGHT CURRENTLY', width=200, height=200)
-	current_scope_label = Label(frame2, textvariable=scope_queue_tk)
+        #1,2
+        current_scope_tk = StringVar()
+        current_scope_tk.set(current_scope)
+	frame2 = LabelFrame(top, text='Current Scope', width=600, height=400)
+	current_scope_label = Label(frame2, textvariable=current_scope_tk)
 	current_scope_label.pack()
 	m1.add(frame2)
 	
@@ -198,7 +196,7 @@ def talker():
 	frame3 = LabelFrame(top, text='Action & Current Number', width=200, height=200)
 	current_action_label = Label(frame3, textvariable=current_action_block_tk)
 	current_number_label = Label(frame3, textvariable=current_number_tk)
-	current_action_label.pack()
+        current_action_label.pack()
 	current_number_label.pack()
 	m1.add(frame3)
 
@@ -207,7 +205,7 @@ def talker():
 	#2,1
 	previous_gestures_tk = StringVar()
 	previous_gestures_tk.set(str(previous_gestures))
-	frame4 = LabelFrame(top, text='Previous Gestures', width=200, height=200)
+	frame4 = LabelFrame(top, text='Previous Gestures', width=600, height=200)
 	previous_gestures_label = Label(frame4, textvariable=previous_gestures_tk, wraplength=100)
 	previous_gestures_label.pack()
 	m2.add(frame4)
@@ -215,7 +213,7 @@ def talker():
 	#2,2
 	legal_gestures_tk = StringVar()
 	legal_gestures_tk.set(str(legal_gestures))
-	frame5 = LabelFrame(top, text='Legal Next Gestures', width=200, height=200)
+	frame5 = LabelFrame(top, text='Legal Next Gestures', width=600, height=600)
 	legal_gestures_label = Label(frame5, textvariable=legal_gestures_tk, wraplength = 100)
 	legal_gestures_label.pack()
 	m2.add(frame5)
@@ -233,7 +231,7 @@ def talker():
 	#3,1
 	command_queue_tk = StringVar()
 	command_queue_tk.set(command_queue)
-	frame7 = LabelFrame(top, text='UAV Command Queue', width=200, height=200)
+	frame7 = LabelFrame(top, text='UAV Command Queue', width=200, height=600)
 	command_queue_label = Label(frame7, textvariable=command_queue_tk)
 	command_queue_label.pack()
 	m3.add(frame7)
@@ -272,16 +270,19 @@ def talker():
 
 	frame_dir = LabelFrame(top, text="Macros", width = 200)
 	x = [f for f in listdir(macro_path) if isfile(join(macro_path,f))]
+        macro_label = []
 	for f in x:
-		macro_label = Label(frame_dir, text = f)
-		macro_label.bind("<Button-1>", lambda e: display_text(f, file_contents_label_tk))
-		macro_label.pack()
+            macro_label.append(Button(frame_dir, text = f, command=lambda f=f: display_text(f, file_contents_label_tk)))
+            #print macro_label[-1].cget('text')
+		#macro_label.bind("<Button-1>", lambda e: display_text(f, file_contents_label_tk))
+	    macro_label[-1].pack()
 	m5.add(frame_dir)
 
 
 
         while not rospy.is_shutdown():
 		current_scopes_tk.set(current_scopes)
+                current_scope_tk.set(current_scope)
 	    	current_action_block_tk.set(current_action_block)
 	    	current_number_tk.set(current_number)
             	current_gesture_tk.set(str(gesture_friendly_names[current_gesture]))
@@ -291,16 +292,16 @@ def talker():
 	    	current_command_tk.set(current_command)
 		command_queue_tk.set(command_queue)
 		
-		if current_scope is not current_scopes.split(",")[-1]:
-			scope_queue = ""
-			current_scope = current_scopes.split(",")[-1]
-		if current_action != current_action_block:
-			scope_queue += str(current_action_block)
-			current_action = current_action_block
-		print "scope: " + str(current_scope)
-		print "current_action: " + str(current_action)
-		print "current_action_block: " + str(current_action_block)
-		print "scope_queue: " + str(scope_queue)
+		#if current_scope is not current_scopes.split(",")[-1]:
+		#	scope_queue = ""
+		#	current_scope = current_scopes.split(",")[-1]
+		#if current_action != current_action_block:
+		#	scope_queue += str(current_action_block)
+		#	current_action = current_action_block
+		#print "scope: " + str(current_scope)
+		#print "current_action: " + str(current_action)
+		#print "current_action_block: " + str(current_action_block)
+		#print "scope_queue: " + str(scope_queue)
 		
 	   	t = tf.getLatestCommonTime("/cam_pos","/world")
 		current_pos, q = tf.lookupTransform("/cam_pos", "/world", t)
@@ -312,13 +313,12 @@ def talker():
 		
 		for f in listdir(macro_path) :
 			if isfile(join(macro_path,f)) and f not in x:
-	    			macro_label = Label(frame_dir, text = f)
-				x.append(f)
-				macro_label.bind("<Button-1>", lambda e: display_text(macro_label.cget("text"), file_contents_label_tk))
-				macro_label.pack()
+                            macro_label.append(Button(frame_dir, text = f, command=lambda f=f:display_text(f,file_contents_label_tk)))
+			    macro_label[-1].pack()
+                            x.append(f)
 			
 
-		rospy.loginfo(previous_gestures)
+		#rospy.loginfo(previous_gestures)
             	pub.publish(str(current_gesture))
             	rate.sleep()
 	    	top.update_idletasks()

@@ -36,7 +36,8 @@ gesture_class_nums = {  "0":0,#
                         "MoveY":18,
                         "MoveZ":19,
                         "Wait":20,
-                        "NOP":21 }#
+                        "NOP":21,
+                        "SetNumberVar":22}#
 
 
 

@@ -1,8 +1,8 @@
 <launch>
 	<node name="leap" pkg="leap_motion" type="sender.py"/>
 	<node name="recognition" pkg="crazy_frog" type="gestureRecognizer.py"/>
-	<node name="compiler" pkg="crazy_frog" type="gestureCompiler.py"/>
+	<node name="compiler" pkg="crazy_frog" type="gestureCompiler.py" output="screen"/>
 	<node name="runtime" pkg="crazy_frog" type="runtime"/>
 	
-	<!--node name="gui" pkg="crazy_frog" type="gui.py"/-->
+	<node name="gui" pkg="crazy_frog" type="gui.py"/>
 </launch>
