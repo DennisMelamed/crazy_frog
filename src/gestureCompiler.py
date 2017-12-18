@@ -103,10 +103,10 @@ def callNumber():
 	number_dict = pickle.load(open("../variables/number_vars.pkl"))
 	if tuple(number_name) in number_dict:
 		num = number_dict[tuple(number_name)]
+		number_name = []
 		return num
 	else:
 		raise numberVariableNotFoundError("The gestures you used do not correspond to a recorded numerical variable")
-	number_name = []
 	
 ##############
 #
@@ -367,6 +367,11 @@ def broadcastData():
     	compiler_data.previous_gesture = previous_gesture
     	compiler_data.current_action_block = str(current_action)
     	compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
+    	if scopes[-1] is not "Idle":
+    		compiler_data.current_scope = ','.join([action.stringifyMeCapN() for action in scopes[-1].getActionList()])
+    	else:
+    		compiler_data.current_scope = "Idle"
+    	compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'
         rospy.loginfo(compiler_data)
         pub2.publish(compiler_data)
         rate.sleep()
