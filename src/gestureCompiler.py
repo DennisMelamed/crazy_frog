@@ -117,14 +117,17 @@ def getLegalGestures():
 	global previous_gesture
 	global recording_number
 	global calling_number
+	global number_name
 	global scopes
 	if	recording_number or calling_number:
 		if not number_name or (number_name and number_name[-1] is not END):
 			return gestures
 		elif previous_gesture is END:
 			return [Digit,END]
+		elif previous_gesture is not SetNumberVar:
+			return idle_legal_gestures[previous_gesture]
 		else:
-			return idle_legal_gestures[previous_gesture] 
+			return gestures 
 	elif scopes[-1] is "Idle":
 		return idle_legal_gestures[previous_gesture]
 	else:
@@ -226,6 +229,7 @@ def endHandler():
 	global previous_gesture
 	global current_action
 	global program_counter
+	global number_name
 	global most_recent_number_run
 	global recording_number
 	global calling_number
@@ -238,16 +242,18 @@ def endHandler():
 		except numberVariableNotFoundError as err:
 			print err
 		calling_number = False
+		number_name = []
 	elif previous_gesture in [CallNumberVar,SetNumberVar]:
 		calling_number = False
 		recording_number = False
+		number_name = []
 	elif (calling_number or recording_number) and number_name and number_name[-1] is not END:
 		return # if we're recording number, we don't want any of the effects after this to occur
 	elif  (calling_number or recording_number) and number_name and number_name[-1] is END and previous_gesture is END:
 		# cancel recording or calling number after name has been started
 		calling_number = False
 		recording_number = False
-		
+		number_name = []
 		return
 	elif previous_gesture in numbers:
 		handleEndOfNumber(digitsToNumber())
@@ -324,6 +330,7 @@ def processGesture(gesture):
 	global current_action
 	global recording_number
 	global calling_number
+	global number_name
 	current_gesture = gesture.data
 	if current_gesture not in gestures:	# if not a recognized action, do nothing
 		return
@@ -358,40 +365,41 @@ def processGesture(gesture):
 	previous_gesture = current_gesture
 
 
-        
+   
 def broadcastData():
-    rospy.init_node('compiler_macro_publisher', anonymous=True)
-    pub1 = rospy.Publisher('crazyFrog/current_program', MacroRequest, queue_size=10)
-    pub2 = rospy.Publisher('crazyFrog/compiler_data', CompilerData, queue_size=10)
-    sub = rospy.Subscriber('crazyFrog/current_gesture', Int32 , processGesture)
-
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown(): # and program_counter > 0
+	global number_name
+	rospy.init_node('compiler_macro_publisher', anonymous=True)
+	pub1 = rospy.Publisher('crazyFrog/current_program', MacroRequest, queue_size=10)
+	pub2 = rospy.Publisher('crazyFrog/compiler_data', CompilerData, queue_size=10)
+	sub = rospy.Subscriber('crazyFrog/current_gesture', Int32 , processGesture)
+	
+	rate = rospy.Rate(10) # 10hz
+	while not rospy.is_shutdown(): # and program_counter > 0
 		# Publish macro run request
 		# if program_counter = 0, then nothing should be run.
-    	macro_request = MacroRequest()
-    	macro_request.program_counter = program_counter
-    	macro_request.macro_number = most_recent_number_run
-        rospy.loginfo(macro_request)
-        pub1.publish(macro_request)
-        # Publish compiler data for GUI (or whatever else)
-        compiler_data = CompilerData()
-        compiler_data.current_number = digitsToNumber()
-    	compiler_data.previous_gesture = previous_gesture
-    	compiler_data.current_action_block = str(current_action)
-    	compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
-    	if scopes[-1] is not "Idle":
-    		compiler_data.current_scope = ','.join([action.stringifyMeCapN() for action in scopes[-1].getActionList()])
-    	else:
-    		compiler_data.current_scope = "Idle"
-    	if number_name and number_name[-1] is END:
-    		compiler_data.var_name = '('+ ','.join([str(n) for n in number_name[:-1]]) +')'	
-    	else:
-    		compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'	
-    	compiler_data.legal_gestures = ','.join([str(g) for g in getLegalGestures()])
-        rospy.loginfo(compiler_data)
-        pub2.publish(compiler_data)
-        rate.sleep()
+		macro_request = MacroRequest()
+		macro_request.program_counter = program_counter
+		macro_request.macro_number = most_recent_number_run
+		rospy.loginfo(macro_request)
+		pub1.publish(macro_request)
+		# Publish compiler data for GUI (or whatever else)
+		compiler_data = CompilerData()
+		compiler_data.current_number = digitsToNumber()
+		compiler_data.previous_gesture = previous_gesture
+		compiler_data.current_action_block = str(current_action)
+		compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
+		if scopes[-1] is not "Idle":
+			compiler_data.current_scope = ','.join([action.stringifyMeCapN() for action in scopes[-1].getActionList()])
+		else:
+			compiler_data.current_scope = "Idle"
+		if number_name and number_name[-1] is END:
+			compiler_data.var_name = '('+ ','.join([str(n) for n in number_name[:-1]]) +')'	
+		else:
+			compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'	
+		compiler_data.legal_gestures = ','.join([str(g) for g in getLegalGestures()])
+		rospy.loginfo(compiler_data)
+		pub2.publish(compiler_data)
+		rate.sleep()
 	
 if __name__ == '__main__':
     try:
