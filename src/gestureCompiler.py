@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-
+#
+#	Author: Owen Levin
+#
 import rospy
 
 import csv
@@ -17,9 +19,9 @@ current_action = None	# in progress construction of an ActionBlock, type can be 
 digits = [1]		# current number in progress
 scopes = ["Idle"] 	# will be used as a stack to push and pop ScopeBlock objects. "Idle" is a parent node that should never be popped/
 					# Possible scopes:	"Idle", RecordMacro, Repeat
-recording_number = False
-calling_number = False
-number_name =[]
+recording_number = False #setting numerical variable
+calling_number = False # calling numerical variable
+number_name =[]# list of gestures that are naming a numerical variable
 
 program_counter = 0
 most_recent_number_run = -1
@@ -38,6 +40,7 @@ def runMacro(num):
 	global most_recent_number_run
 	macro_file = macro_folder + "macro" + str(num)+ file_ext
 	if os.path.exists(macro_file):
+		# update the program counter and value of macro to run for publication to runtime
 		program_counter = program_counter+1
 		most_recent_number_run = num
 	else:
@@ -54,6 +57,10 @@ def runMacro(num):
 def writeRecordedMacroToCSV(record_block):
 	num = record_block.getNumber()
 	action_string_list = record_block.stringifyMeCapN()
+	if not os.path.exists(macro_folder):
+		# initialize the macro dictionary if it doesn't exist yet
+		print("Making new directory to store macros: "+macro_folder)
+		os.mkdir(macro_folder)
 	#print('---WRITINING <'+ ', '.join(action_string_list) +'> to macro number '+str(num))
 	with open(macro_folder + "macro" + str(num)+ file_ext, 'wb') as csv_file:
 			macroWriter = csv.writer(csv_file, delimiter='\n')
@@ -98,8 +105,7 @@ def writeNumber(num):
 #########	
 def callNumber():
 	global number_name
-	# print('\n\n\nWOOOOOOOOOOOO WEre CALLING A NUMBER\n\n\n')
-	# print(number_name)
+	# checks the pickled variable dictionary for number being called, returning it if it exists
 	number_dict = pickle.load(open("../variables/number_vars.pkl"))
 	if tuple(number_name) in number_dict:
 		num = number_dict[tuple(number_name)]
@@ -121,10 +127,13 @@ def getLegalGestures():
 	global scopes
 	if	recording_number or calling_number:
 		if not number_name or (number_name and number_name[-1] is not END):
+			# any nonEND gesture can be used in variable name
 			return gestures
 		elif previous_gesture is END:
+			# name is finished being defined, so now start giving number parameter
 			return [Digit,END]
 		elif previous_gesture is not SetNumberVar:
+			# previous gesture was begining of number value for the variable.  want to continue inputting number
 			return idle_legal_gestures[previous_gesture]
 		else:
 			return gestures 
@@ -174,15 +183,16 @@ def handleEndOfNumber(num = digitsToNumber()):
 	global calling_number
 	global number_name
 	
-	digits = [1]
+	digits = [1]# resets digits to keep track of the next number parameter
 	# print('HANDLING END OF NUMBER WITH NUMBER: '+str(num))
 	if recording_number and number_name[-1] is END:
-		# print("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNUMBER NAME IS:" + str(number_name))
+		# the numerical value of a variable has been set, and the number has been named, so we save the variable
 		if len(number_name) > 1:
 			writeNumber(num)
 		recording_number = False
 		return
 	if current_action is not None and scopes[-1] is not "Idle":
+		# give num as number parameter to an action and add that action to the current scope if it is well-defined
 		actionSuccessful = False
 		try:
 			current_action.setNumber(num)
@@ -233,24 +243,26 @@ def endHandler():
 	global most_recent_number_run
 	global recording_number
 	global calling_number
-	#
-	# print("END and RECORDINGGGGGGGGGGGGGGGGGGGGGggggggggggggggggggggggggggggggggggggGGGGGGGGGGGG:" + str(recording_number))
-	#
+
 	if calling_number and number_name:
-		try:
+		# ended a variable's name which is being called, so here we attempt to call a variable with that name if it exists
+		try: 
 			handleEndOfNumber(num = callNumber())
 		except numberVariableNotFoundError as err:
 			print err
 		calling_number = False
 		number_name = []
 	elif previous_gesture in [CallNumberVar,SetNumberVar]:
+		# cancel the variable call/set
 		calling_number = False
 		recording_number = False
 		number_name = []
 	elif (calling_number or recording_number) and number_name and number_name[-1] is not END:
 		return # if we're recording number, we don't want any of the effects after this to occur
+		# the variable name is now defined, but no value has yet been set
+		# in processGesture(), END will be added to the variable name
 	elif  (calling_number or recording_number) and number_name and number_name[-1] is END and previous_gesture is END:
-		# cancel recording or calling number after name has been started
+		# cancel recording or calling number after name has been given, but no number was set
 		calling_number = False
 		recording_number = False
 		number_name = []
@@ -259,10 +271,10 @@ def endHandler():
 		handleEndOfNumber(digitsToNumber())
 	# previous gesture not number		
 	elif previous_gesture in [RecordMacro, Repeat]: 
-	# cancelling record/repeat command and ends the scope they started
+		# cancelling record/repeat command and ends the scope they started
 		scopes.pop()
 	elif previous_gesture in actions or previous_gesture is Run: 
-	# cancels a run/macro call/movement/wait command
+		# cancels a run/macro call/movement/wait command
 		current_action = None
 	elif previous_gesture is END:
 		# we cannot be in an idle scope here since only ways to do that are ending from an idle number or Run, both of which are handled already
@@ -332,19 +344,18 @@ def processGesture(gesture):
 	global calling_number
 	global number_name
 	current_gesture = gesture.data
-	if current_gesture not in gestures:	# if not a recognized action, do nothing
+	if current_gesture not in gestures:	
+		# if not a recognized action, do nothing
 		return
 	else:
+		# if gesture is not legal in language syntax, do nothing
 		legal_gestures = getLegalGestures()
 		if current_gesture not in legal_gestures:
 			return
 	if current_gesture is END:
 		endHandler()
-	#
-	# print(number_name)
-	#
 	if (recording_number or calling_number) and (not number_name or number_name[-1] is not END):
-			number_name.append(current_gesture) # must come after endHandler() so that the last gesture is end in the name of the variable.
+			number_name.append(current_gesture) # must come after endHandler() so that the last gesture is END in the name of the variable.
 	elif current_gesture is SetNumberVar:
 		recording_number = True
 	elif current_gesture is CallNumberVar:
@@ -387,15 +398,19 @@ def broadcastData():
 		compiler_data.current_number = digitsToNumber()
 		compiler_data.previous_gesture = previous_gesture
 		compiler_data.current_action_block = str(current_action)
+		# the scope stack is published as just a ',' delimited string of the kinds of scopes
 		compiler_data.scopes = ', '.join([str(scope) for scope in scopes])
 		if scopes[-1] is not "Idle":
+			# the current scope also has a ',' delimeted string of what actions are in it
 			compiler_data.current_scope = ','.join([action.stringifyMeCapN() for action in scopes[-1].getActionList()])
 		else:
 			compiler_data.current_scope = "Idle"
 		if number_name and number_name[-1] is END:
+			# the variable name is published as a tuple of gestures, END is never actually part of a variable name, so it is removed from the tuple if present.  END actually denotes that the variable name has been completed, but we are still defining the numerical value of the variable
 			compiler_data.var_name = '('+ ','.join([str(n) for n in number_name[:-1]]) +')'	
 		else:
 			compiler_data.var_name = '('+ ','.join([str(n) for n in number_name]) +')'	
+		# legal gestures are published as a ',' delimeted tuple
 		compiler_data.legal_gestures = ','.join([str(g) for g in getLegalGestures()])
 		rospy.loginfo(compiler_data)
 		pub2.publish(compiler_data)

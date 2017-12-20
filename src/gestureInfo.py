@@ -1,5 +1,9 @@
 from numpy import dot
 
+#
+#	Author: Owen Levin
+#
+
 macro_folder = "../macros/"
 file_ext = ".csv"
 
