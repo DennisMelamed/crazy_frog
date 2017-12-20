@@ -1,6 +1,10 @@
 import csv
 import os
 from gestureInfo import *
+#
+#	Author: Owen Levin
+#
+
 
 ###############################################################################
 #	

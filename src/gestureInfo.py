@@ -1,9 +1,13 @@
+#
+#	Author: Owen Levin
+#
 from numpy import dot
 import rospkg
 
 rospack = rospkg.RosPack()
 
 macro_folder = rospack.get_path('crazy_frog') + "/macros/"
+
 file_ext = ".csv"
 
 # Index of Gestures
