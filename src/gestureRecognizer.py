@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-# license removed for brevity
+#
+#Authors: Dennis Melamed, Owen Levin
+#
 import rospy
 import pickle
 import sklearn

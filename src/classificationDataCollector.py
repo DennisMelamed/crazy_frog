@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-# license removed for brevity
+#
+#Author: Dennis Melamed
+#
+
 import rospy
 import pickle
 import sklearn
@@ -17,6 +20,7 @@ X = np.empty([numPointsToCollect,87], dtype=float)
 y = np.empty([numPointsToCollect], dtype=int)
 printflag = False
 
+#stores the collected points in a pickle file under the gesture's name
 def spitOutResults():
     global printflag
     global X, y
@@ -32,6 +36,7 @@ def callback(data):
     global X
     global y
     global numPointsToCollect
+    #collects a ton of points from the leap motion and puts them in a 2d array that we can use in the classifier
     if i < numPointsToCollect:
         X[i] = ([data.direction.x, data.direction.y, data.direction.z,
                 data.normal.x, data.normal.y, data.normal.z,

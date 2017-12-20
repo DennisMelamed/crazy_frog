@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+#Author: Dennis Melamed
+#
 import rospy
 import rospkg
 from tf import TransformListener
@@ -53,7 +56,7 @@ gesture_friendly_names = ['0',
 
 	
 
-
+#get the info the compiler is publishing, like the scopes and gestures and macro numbers
 def compilerCallback(data):
 	global current_scopes
         global current_scope
@@ -69,13 +72,15 @@ def compilerCallback(data):
 		previous_gestures.append(gesture_friendly_names[data.previous_gesture])
         legal_gestures = str([gesture_friendly_names[int(x)] for x in data.legal_gestures.split(",")])
 
+#get goal positino data from the the runtime
 def runtimeCallback(data):
 	global goal_pos
 	goal_pos = "[" + str(data.pose.position.x) + ", "+ str(data.pose.position.y) + ", "+str(data.pose.position.z) + "]"
+#get the current gesture from the gesture recognizer node
 def gestureCallback(data):
 	global current_gesture
 	current_gesture = data.data
-
+#the runtime publishes the current command being run, and the command queue. collect them in these callbacks
 def currentCommandCallback(data):
 	global current_command
 	current_command = data.data
@@ -84,6 +89,7 @@ def commandQueueCallback(data):
 	global command_queue
 	command_queue = data.data
 
+#displays the desired macro file contents in the macro display window
 def display_text(file_path, text_label):
 	global macro_path
 	#print file_path
@@ -92,6 +98,9 @@ def display_text(file_path, text_label):
 	with open(full_path) as f:
 		text_label.set(f.read())
 
+#main chunk
+#this is a very bloated method, most of the setup will be moved to a seperate method
+#the updating could also be moved out, for debugging this is the most useful way to have it currently
 def talker():
 	global current_scopes	
 	global current_action_block
@@ -104,6 +113,7 @@ def talker():
 	global current_command
 	global command_queue
 
+        #listen to everyone to get some info to display
         pub = rospy.Publisher('info', String, queue_size=10)
 	compiler = rospy.Subscriber('crazyFrog/compiler_data', CompilerData, compilerCallback)
 	runtime_goal = rospy.Subscriber('goal', PoseStamped, runtimeCallback)
@@ -111,7 +121,7 @@ def talker():
 	runtime_current_command = rospy.Subscriber('crazyFrog/current_command', String, currentCommandCallback)
 	runtime_command_queue   = rospy.Subscriber('crazyFrog/command_queue', String, commandQueueCallback)
 	
-
+        #handles getting the current UAV transform
 	tf = TransformListener()
 
         rospy.init_node('gui', anonymous=True)
@@ -172,7 +182,7 @@ def talker():
 	##############################################
 
 	#ROW1
-	#1,1
+        #1,1: Unclosed Scopes
 	current_scopes_tk = StringVar()
 	current_scopes_tk.set(current_scopes)
 	frame1 = LabelFrame(top, text='Unclosed Scopes', width=400, height=600)
@@ -180,7 +190,7 @@ def talker():
 	unclosed_label.pack()
 	m1.add(frame1)
 
-        #1,2
+        #1,2: Current Scope
         current_scope_tk = StringVar()
         current_scope_tk.set(current_scope)
 	frame2 = LabelFrame(top, text='Current Scope', width=600, height=400)
@@ -188,7 +198,7 @@ def talker():
 	current_scope_label.pack()
 	m1.add(frame2)
 	
-	#1,3
+        #1,3: Current Action & Curretn Number being built
 	current_action_block_tk = StringVar()
 	current_action_block_tk.set(current_action_block)
 	current_number_tk = StringVar()
@@ -202,7 +212,7 @@ def talker():
 
 
 	#ROW2
-	#2,1
+        #2,1: Previous gestures the compiler has used
 	previous_gestures_tk = StringVar()
 	previous_gestures_tk.set(str(previous_gestures))
 	frame4 = LabelFrame(top, text='Previous Gestures', width=600, height=200)
@@ -210,7 +220,7 @@ def talker():
 	previous_gestures_label.pack()
 	m2.add(frame4)
 
-	#2,2
+        #2,2: Legal next gestures given the previous gesture
 	legal_gestures_tk = StringVar()
 	legal_gestures_tk.set(str(legal_gestures))
 	frame5 = LabelFrame(top, text='Legal Next Gestures', width=600, height=600)
@@ -218,7 +228,7 @@ def talker():
 	legal_gestures_label.pack()
 	m2.add(frame5)
 
-	#2,3
+        #2,3: Current gesture being recognized by the Leap
 	current_gesture_tk = StringVar()
 	current_gesture_tk.set(str(gesture_friendly_names[current_gesture]))
 	frame6 = LabelFrame(top, text='Current Gesture', width=200, height=200)
@@ -228,7 +238,7 @@ def talker():
 
 	
 	#ROW3
-	#3,1
+        #3,1: Current command queue the runtime is working through
 	command_queue_tk = StringVar()
 	command_queue_tk.set(command_queue)
 	frame7 = LabelFrame(top, text='UAV Command Queue', width=200, height=600)
@@ -236,14 +246,14 @@ def talker():
 	command_queue_label.pack()
 	m3.add(frame7)
 	
-	#3,2
+        #3,2: Current command the UAV is executing
 	current_command_tk = StringVar()
 	frame8 = LabelFrame(top, text='Current UAV Command', width=200, height=200)
 	current_command_label = Label(frame8, textvariable=current_command_tk)
 	current_command_label.pack()
 	m3.add(frame8)	
 
-	#3,3
+        #3,3: The current and goal positions of the UAV
 	current_pos_tk = StringVar()
 	current_pos_tk.set(str(current_pos))
 	goal_pos_tk = StringVar()
@@ -260,27 +270,26 @@ def talker():
 	m3.add(frame9)
 
 
-	#DIRECTORY PANE
+	#VIEW THE CONTENTS OF MACRO FILES HERE
 	display_text_frame = LabelFrame(top, text="Macro View", width = 200)
 	file_contents_label_tk = StringVar()
 	file_contents_label = Label(display_text_frame, textvariable=file_contents_label_tk)
 	file_contents_label.pack()
 	m7.add(display_text_frame)
 
-
+        #Listing of macros that can be clicked on to display their contents (far left panel)
 	frame_dir = LabelFrame(top, text="Macros", width = 200)
 	x = [f for f in listdir(macro_path) if isfile(join(macro_path,f))]
         macro_label = []
 	for f in x:
             macro_label.append(Button(frame_dir, text = f, command=lambda f=f: display_text(f, file_contents_label_tk)))
-            #print macro_label[-1].cget('text')
-		#macro_label.bind("<Button-1>", lambda e: display_text(f, file_contents_label_tk))
 	    macro_label[-1].pack()
 	m5.add(frame_dir)
 
 
 
         while not rospy.is_shutdown():
+                #update labels based on most recent information
 		current_scopes_tk.set(current_scopes)
                 current_scope_tk.set(current_scope)
 	    	current_action_block_tk.set(current_action_block)
@@ -291,22 +300,14 @@ def talker():
 		goal_pos_tk.set(goal_pos)
 	    	current_command_tk.set(current_command)
 		command_queue_tk.set(command_queue)
-		
-		#if current_scope is not current_scopes.split(",")[-1]:
-		#	scope_queue = ""
-		#	current_scope = current_scopes.split(",")[-1]
-		#if current_action != current_action_block:
-		#	scope_queue += str(current_action_block)
-		#	current_action = current_action_block
-		#print "scope: " + str(current_scope)
-		#print "current_action: " + str(current_action)
-		#print "current_action_block: " + str(current_action_block)
-		#print "scope_queue: " + str(scope_queue)
-		
+
+
+		#get latest UAV-world transform
 	   	t = tf.getLatestCommonTime("/cam_pos","/world")
 		current_pos, q = tf.lookupTransform("/cam_pos", "/world", t)
 		current_pos_tk.set( "[" + format(current_pos[0], '.2f') + ", " + format(current_pos[1], '.2f') +", "+ format(current_pos[2], '.2f') + "]") 
 	    
+                #update the macro listing on the far left in case anything changed
 		for widget in frame_dir.winfo_children():
 		 	if not (widget.cget("text") in listdir(macro_path)):
 		 		widget.destroy()
@@ -318,8 +319,6 @@ def talker():
                             x.append(f)
 			
 
-		#rospy.loginfo(previous_gestures)
-            	pub.publish(str(current_gesture))
             	rate.sleep()
 	    	top.update_idletasks()
 	    	top.update()

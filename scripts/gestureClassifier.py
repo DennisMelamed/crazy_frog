@@ -1,3 +1,6 @@
+#
+#Authors: Owen Levin, Dennis Melamed
+#
 import numpy as np
 from sklearn import neighbors, datasets
 import pickle

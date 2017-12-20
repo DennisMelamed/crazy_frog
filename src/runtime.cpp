@@ -19,8 +19,12 @@
 #include <string>
 #include <ros/package.h>
 
+//allowable position error
 #define POSITION_ERROR .1
+
+//possible command variables
 enum Direction{w, x, y, z};
+
 
 struct Command
 {
@@ -61,7 +65,7 @@ void addMacroCommandsToQueue(int macro_number)
 		if (!(iss >> a >> b)) { break; } // error
 		ROS_INFO("command added: %c, distance: %d", a, b);
 		Command new_command;
-		new_command.a = static_cast<Direction>(a-119);
+		new_command.a = static_cast<Direction>(a-119); //-119 converts the char to the right integer
 		ROS_INFO("added command with direction: %d", new_command.a);
 		new_command.amount = b;
 		command_queue.push(new_command);
@@ -73,6 +77,7 @@ void addMacroCommandsToQueue(int macro_number)
 	
 }
 
+//adds a new program to the queue when the compiler requests it
 void programCallback(const crazyFrog::MacroRequest& request)
 {
 	if(request.program_counter > current_program_number)
@@ -81,9 +86,11 @@ void programCallback(const crazyFrog::MacroRequest& request)
 		addMacroCommandsToQueue(request.macro_number);
 		ROS_INFO("adding a new program to queue");
 	}
-	ROS_INFO("currently running program # %d, which is macro # %d", current_program_number, request.macro_number);
 }
 
+
+//handles current transform to the UAV
+//TODO modify to use parameters for the frames that are used to find the current UAV-world transform
 void updateTransform(tf::StampedTransform& transform, tf::TransformListener& listener)
 {
 	try
@@ -95,8 +102,6 @@ void updateTransform(tf::StampedTransform& transform, tf::TransformListener& lis
 		ROS_ERROR("%s",ex.what());
 		ros::Duration(1.0).sleep();
 	}
-	
-//	ROS_INFO("current transform x: %f y %f z %f", transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
 }
 
 
@@ -105,8 +110,6 @@ void init(tf::StampedTransform& transform)
 	start_position.x = transform.getOrigin().x();
 	start_position.y = transform.getOrigin().y();
 	start_position.z = transform.getOrigin().z();
-//ROS_INFO("current transform x: %f y %f z %f", transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
-
 }
 
 bool posWithinError(double start_pos, double current_pos, double goal_pos, double allowable_error)
@@ -125,8 +128,6 @@ bool posWithinError(double start_pos, double current_pos, double goal_pos, doubl
 }
 bool goalAchieved(tf::StampedTransform& transform)
 {
-	ROS_INFO("current transform x: %f y %f z %f", transform.getOrigin().x(), transform.getOrigin().y(), transform.getOrigin().z());
-	ROS_INFO("wait_timer: %d ", wait_timer);
    	if(  posWithinError(start_position.x, transform.getOrigin().x(), msg.pose.position.x, POSITION_ERROR) &&
    	     posWithinError(start_position.y, transform.getOrigin().y(), msg.pose.position.y, POSITION_ERROR) &&
    	     posWithinError(start_position.z, transform.getOrigin().z(), msg.pose.position.z, POSITION_ERROR) &&
@@ -142,6 +143,7 @@ bool goalAchieved(tf::StampedTransform& transform)
 
 }
 
+//deals with sending the new message to the UAV if it has completed the previous command
 void updateMessage(tf::StampedTransform& transform)
 {
 	
@@ -150,13 +152,12 @@ void updateMessage(tf::StampedTransform& transform)
 		ROS_INFO("setting new goal pos");
 		current = command_queue.front();
 		std::stringstream current_string;
-		current_string << (char) (current.a+119) << " " << current.amount;
+		current_string << (char) (current.a+119) << " " << current.amount; //+119 converts it to the appropriate char
 		current_msg.data = current_string.str().c_str();
 		std::string queue_string(queue_msg.data);
 		queue_string.erase(0, queue_string.find("\n")+1);
 		queue_msg.data = queue_string.c_str();
 		command_queue.pop();
-		ROS_INFO("setting new goal position with direction: %d, at point: %f", current.a, msg.pose.position.x+current.amount);
 		Direction a = x;
 		Direction b = y;
 		Direction c = z;
@@ -168,8 +169,6 @@ void updateMessage(tf::StampedTransform& transform)
 		{
 			wait_timer = current.amount*10;
 		}
-		ROS_INFO("actual goal pose set: %f, %f, %f", msg.pose.position.x, msg.pose.position.y, msg.pose.position.z);
-	  	// handle (current.a == w) // a wait command
 		init(transform);
       }
       if(command_queue.empty() && goalAchieved(transform))
